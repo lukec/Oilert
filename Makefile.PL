@@ -25,6 +25,7 @@ WriteMakefile(
         'Number::Phone' => 0,
         'Web::Scraper' => 0,
         'DateTime' => 0,
+        'URI' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Oilert-*' },

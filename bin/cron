@@ -1,5 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env perl
 
-perl -e 'sleep rand(180)'
-./bin/scrape
-./bin/notify
+use strict;
+use warnings;
+use FindBin;
+
+
+# sleep(rand(180));
+system("$FindBin::Bin/scrape");
+system("$FindBin::Bin/notify");
+

@@ -27,7 +27,7 @@ text-decoration: none;
 
 #page {
 background-color: #ddd;
-width: 750px;
+width: 850px;
 margin: auto;
 margin-left: auto;
 padding-left: 0px;
@@ -39,7 +39,7 @@ background-color: white;
 border: 3px solid #aaa;
 border-top: none;
 padding: 25px;
-width: 500px;
+width: 600px;
 }
 
 #sidebar {
@@ -48,15 +48,12 @@ width: 175px;
 }
 
 #header, #about, #getting-started {
-padding-left: 75px;
+padding-left: 15px;
 padding-right: 30px;
 }
 
 
 #header {
-background-image: url("/images/perldancer.jpg");
-background-repeat: no-repeat;
-background-position: top left;
 height: 64px;
 }
 #header h1, #header h2 {margin: 0}

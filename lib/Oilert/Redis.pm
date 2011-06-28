@@ -26,16 +26,31 @@ method get_json {
 method _build_redis {
     my $env_file = "/home/dotcloud/environment.json";
     if (-e $env_file) {
-        open(my $fh, $env_file);
-        local $/ = undef;
-        my $json = <$fh>;
-
-        my $env = decode_json($json);
+        my $env = load_env($env_file);
         my $server = $env->{DOTCLOUD_MYREDIS_REDIS_URL};
         $server =~ s#^redis://##;
-        Redis->new(server => $server);
+        my $r = Redis->new(server => $server);
+        $r->auth($env->{REDIS_PASSWORD});
+        return $r;
     }
     else {
-        Redis->new
+        return Redis->new
     }
+}
+
+sub load_json {
+    my $file = shift;
+    open(my $fh, $env_file);
+    local $/ = undef;
+    my $json = <$fh>;
+    close $fh;
+
+    my $env = decode_json($json);
+
+    # Hack to work around dotcloud bug:
+    open($fh, "/home/dotcloud/redis-environment.json");
+    $json = <$fh>;
+    my $redis_env = decode_json($json);
+    $env->{REDIS_PASSWORD} = $redis_env->{password};
+    return $env;
 }

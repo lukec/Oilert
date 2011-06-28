@@ -1,5 +1,5 @@
 #!/usr/bin/env plackup
 use Dancer;
-use oilert;
+use Oilert;
 
 dance;

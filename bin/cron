@@ -1,9 +1,7 @@
-#!/usr/bin/env perl
-
+#!/opt/perl5/perls/current/bin/perl
 use strict;
 use warnings;
 use FindBin;
-
 
 # sleep(rand(180));
 system("$FindBin::Bin/scrape");

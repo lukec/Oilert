@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/env plackup
 use Dancer;
 use oilert;
 

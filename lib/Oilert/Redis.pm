@@ -38,7 +38,7 @@ method _build_redis {
     }
 }
 
-sub load_json {
+sub load_env {
     my $file = shift;
     open(my $fh, $file);
     local $/ = undef;

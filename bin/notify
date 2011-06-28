@@ -3,8 +3,9 @@ use 5.12.0;
 use YAML q/LoadFile/;
 use lib 'lib';
 use Oilert::Notifier;
+use FindBin;
 
-my $data = LoadFile('data/ships.yaml') or die "Couldn't load the Yaml!";
+my $data = LoadFile("$FindBin::Bin/../data/ships.yaml") or die "Couldn't load the Yaml!";
 my $notifier = Oilert::Notifier->new;
 
 my $notifications = $notifier->check($data);

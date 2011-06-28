@@ -5,6 +5,6 @@ use FindBin;
 
 sleep(rand(180));
 $ENV{PERL5LIB} .= ":/home/dotcloud/current/lib";
-system("$FindBin::Bin/scrape");
-system("$FindBin::Bin/notify");
+system("$^X $FindBin::Bin/scrape");
+system("$^X $FindBin::Bin/notify");
 

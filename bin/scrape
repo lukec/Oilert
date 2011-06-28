@@ -25,6 +25,13 @@ for my $type (qw/Cargo Tanker/) {
         for (qw/map_url detail_url/) {
             $s->{$_} = $s->{$_}->as_string;
         }
+        if ($s->{detail_url} =~ m/MMSI=(\d+)/) {
+            $s->{mmsi} = $1;
+        }
+        if ($s->{map_url} =~ m/centerx=([-\d.]+)&centery=([\d\.]+)/) {
+            $s->{longitude} = $1;
+            $s->{latitude} = $2;
+        }
     }
     $data{$type} = $ships;
 }

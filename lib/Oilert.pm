@@ -20,9 +20,11 @@ post '/notify' => sub {
     my $message = "No action taken.";
     if (my $start_num = get_number('signup_number')) {
         $message = "Added notifications for $start_num";
+        $redis->sadd('notify', $start_num);
     }
     elsif (my $stop_num = get_number('stop_number')) {
         $message = "Stopped notifications for $stop_num";
+        $redis->srem('notify', $stop_num);
     }
 
     forward '/', { message => $message }, { method => 'GET' };

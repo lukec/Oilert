@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-use 5.14.0;
+use 5.12.0;
 use YAML q/LoadFile/;
 use lib 'lib';
 use Oilert::Notifier;

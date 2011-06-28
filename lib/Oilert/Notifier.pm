@@ -1,5 +1,5 @@
 package Oilert::Notifier;
-use 5.14.0;
+use 5.12.0;
 use methods;
 use Moose;
 use WWW::Twilio::API;

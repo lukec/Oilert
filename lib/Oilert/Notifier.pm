@@ -19,8 +19,7 @@ method check {
     for my $type (keys %$data) {
         for my $ship (@{ $data->{$type} }) {
             $seen{ $ship->{mmsi} } ||= $ship;
-            say "Checking $ship->{name} ... $ship->{detail_url}";
-            say $self->redis->type("ships_in_bi");
+#            say "Checking $ship->{name} ... $ship->{detail_url}";
             if ($self->redis->sismember("ships_in_bi", $ship->{mmsi})) {
                 # ship was already in BI
                 my $prev_state = $self->redis->get_json($ship->{mmsi});

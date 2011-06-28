@@ -33,7 +33,6 @@ for my $type (qw/Cargo Tanker/) {
     my $ships = $ship_scraper->scrape(URI->new($uri)) || [];
     $ships = [ grep { keys %$_ and $_->{speed} ne 'Speed' } @$ships ];
     for my $s (@$ships) {
-        warn "Looking at $s->{name} ...\n";
         for (qw/map_url detail_url/) {
             $s->{$_} = $s->{$_}->as_string;
         }

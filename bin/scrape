@@ -3,8 +3,9 @@ use strict;
 use warnings;
 use URI;
 use Web::Scraper;
+use YAML qw/DumpFile/;
 
-my $ships = scraper {
+my $ship_scraper = scraper {
     process "table tr", "ships[]" => scraper {
         process "td:nth-child(2)", 'name' => 'TEXT';
         process "td:nth-child(2) a", 'detail_url' => '@href';
@@ -15,7 +16,17 @@ my $ships = scraper {
     result 'ships';
 };
 
-my $uri = 'http://www.marinetraffic.com/ais/datasheet.aspx?SHIPNAME=&TYPE_SUMMARY=Cargo&PORT_ID=682&menuid=&datasource=SHIPS_CURRENT&app=&mode=&B1=Search';
-my $foo = $ships->scrape(URI->new($uri));
-use Data::Dumper;
-warn Dumper $foo;
+my %data;
+for my $type (qw/Cargo Tanker/) {
+    my $uri = "http://www.marinetraffic.com/ais/datasheet.aspx?TYPE_SUMMARY=$type&PORT_ID=682&datasource=SHIPS_CURRENT&B1=Search";
+    my $ships = $ship_scraper->scrape(URI->new($uri)) || [];
+    $ships = [ grep { keys %$_ and not $_->{speed} } @$ships ];
+    for my $s (@$ships) {
+        for (qw/map_url detail_url/) {
+            $s->{$_} = $s->{$_}->as_string;
+        }
+    }
+    $data{$type} = $ships;
+}
+
+DumpFile('data/ships.yaml', \%data);

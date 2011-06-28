@@ -1,0 +1,63 @@
+---
+Cargo:
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=356389000
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=356389000&centerx=-123.0721&centery=49.29995
+    name: ANGELINA
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=351179000
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=351179000&centerx=-123.0328&centery=49.29733
+    name: BRIGHT STREAM
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=256680000
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=256680000&centerx=-123.082&centery=49.28793
+    name: CN_JUMBOS
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=636090750
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=636090750&centerx=-123.0958&centery=49.28937
+    name: COSCO VANCOUVER
+    speed: 0
+    type: 'Cargo - Hazard A (Major)'
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=371622000
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=371622000&centerx=-123.067&centery=49.30448
+    name: CSE CLIPPER EXPRESS
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=477829200
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=477829200&centerx=-123.0349&centery=49.29137
+    name: DOMINA
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=431551000
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=431551000&centerx=-123.0599&centery=49.3048
+    name: KEN ANN MARU
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=357549000
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=357549000&centerx=-123.0561&centery=49.3042
+    name: LEGATO
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=636092165
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=636092165&centerx=-123.0675&centery=49.28917
+    name: POS AMAZONIT
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=311052200
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=311052200&centerx=-123.1082&centery=49.30833
+    name: RHODOS
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=564748000
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=564748000&centerx=-123.0786&centery=49.28787
+    name: RUBY_INDAH
+    speed: 0
+    type: Cargo
+  - detail_url: http://www.marinetraffic.com/ais/shipdetails.aspx?MMSI=355178000
+    map_url: http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=355178000&centerx=-123.0511&centery=49.30271
+    name: U-SEA SASKATCHEWAN
+    speed: 0
+    type: Cargo
+Tanker: []

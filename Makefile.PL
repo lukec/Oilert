@@ -3,10 +3,10 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME                => 'oilert',
-    AUTHOR              => q{YOUR NAME <youremail@example.com>},
-    VERSION_FROM        => 'lib/oilert.pm',
-    ABSTRACT            => 'YOUR APPLICATION ABSTRACT',
+    NAME                => 'Oilert',
+    AUTHOR              => q{Luke Closs <cpan@5thplane.com>},
+    VERSION_FROM        => 'lib/Oilert.pm',
+    ABSTRACT            => 'Oil Tanker Notifier Service',
     ($ExtUtils::MakeMaker::VERSION >= 6.3002
       ? ('LICENSE'=> 'perl')
       : ()),
@@ -24,5 +24,5 @@ WriteMakefile(
         'Template' => 2.22,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'oilert-*' },
+    clean               => { FILES => 'Oilert-*' },
 );

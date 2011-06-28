@@ -20,6 +20,7 @@ WriteMakefile(
         'WWW::Twilio::API' => 0,
         'methods'    => 0,
         'Redis'      => 0,
+        'WWW::Shorten::Googl' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'oilert-*' },

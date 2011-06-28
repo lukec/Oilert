@@ -23,4 +23,16 @@ method get_json {
 }
     
 
-method _build_redis { Redis->new }
+method _build_redis {
+    if (-e "environment.json") {
+        open(my $fh, "environment.json");
+        local $/ = undef;
+        my $json = <$fh>;
+
+        my $env = decode_json($json);
+        Redis->new(server => $env->{DOTCLOUD_MYREDIS_REDIS_URL});
+    }
+    else {
+        Redis->new
+    }
+}

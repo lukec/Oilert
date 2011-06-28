@@ -77,15 +77,20 @@ method notify {
     my $reason = $notif->{reason};
     my $link = makeashorterlink($ship->{detail_url});
 
-    my $to = '604-807-3906';
-    warn "Notifying $to about $ship->{name}\n";
-    my $resp = $self->twilio->POST(
-        'SMS/Messages',
-        From => $self->config->{sms_number},
-        To => $to,
-        Body => "$ship->{type} ship '$ship->{name}' $reason - $link",
-    );
-    say "$resp->{content}";
+    my @recipients = $self->redis->smembers('notify');
+    if (!@recipients) {
+        warn "No recipients to notify about $reason!";
+        return;
+    }
+    for my $to (@recipients) {
+        warn "Notifying $to about $ship->{name}\n";
+        my $resp = $self->twilio->POST(
+            'SMS/Messages',
+            From => $self->config->{sms_number},
+            To => $to,
+            Body => "$ship->{type} ship '$ship->{name}' $reason - $link",
+        );
+    }
 }
 
 method clear_state {

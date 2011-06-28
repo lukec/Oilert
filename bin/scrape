@@ -4,6 +4,7 @@ use warnings;
 use URI;
 use Web::Scraper;
 use YAML qw/DumpFile/;
+use Math::Polygon;
 
 my $ship_scraper = scraper {
     process "table tr", "ships[]" => scraper {
@@ -16,24 +17,41 @@ my $ship_scraper = scraper {
     result 'ships';
 };
 
+# Only save ships that are in the burrard inlet
+my $polygon = Math::Polygon->new(
+    [49.303078,-123.026962],
+    [49.310909,-122.984734],
+    [49.311134,-122.923279],
+    [49.286957,-122.918472],
+    [49.287403,-123.026962],
+    [49.303078,-123.026962],
+);
+
 my %data;
 for my $type (qw/Cargo Tanker/) {
     my $uri = "http://www.marinetraffic.com/ais/datasheet.aspx?TYPE_SUMMARY=$type&PORT_ID=682&datasource=SHIPS_CURRENT&B1=Search";
     my $ships = $ship_scraper->scrape(URI->new($uri)) || [];
-    $ships = [ grep { keys %$_ and not $_->{speed} } @$ships ];
+    $ships = [ grep { keys %$_ and $_->{speed} ne 'Speed' } @$ships ];
     for my $s (@$ships) {
+        warn "Looking at $s->{name} ...\n";
         for (qw/map_url detail_url/) {
             $s->{$_} = $s->{$_}->as_string;
         }
         if ($s->{detail_url} =~ m/MMSI=(\d+)/) {
             $s->{mmsi} = $1;
         }
+        else {
+            die "Couldn't find mmsi for $s->{name}";
+        }
         if ($s->{map_url} =~ m/centerx=([-\d.]+)&centery=([\d\.]+)/) {
-            $s->{longitude} = $1;
-            $s->{latitude} = $2;
+            $s->{lng} = $1;
+            $s->{lat} = $2;
+        }
+        else {
+            die "Couldn't find lat,lng for $s->{name}";
         }
     }
-    $data{$type} = $ships;
+    $data{$type} = [ grep { $polygon->contains([$_->{lat}, $_->{lng}]) } @$ships ];
 }
 
 DumpFile('data/ships.yaml', \%data);

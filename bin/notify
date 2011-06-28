@@ -1,28 +1,37 @@
 #!/usr/bin/env perl
 use 5.14.0;
 use YAML q/LoadFile/;
+use lib 'lib';
+use Oilert::Notifier;
+use Oilert::Redis;
 use Math::Polygon;
 
 my $data = LoadFile('data/ships.yaml') or die "Couldn't load the Yaml!";
 my $polygon = load_polygon();
+my $notifier = Oilert::Notifier->new;
+my $redis = Oilert::Redis->new;
 
 for my $type (keys %$data) {
     for my $ship (@{ $data->{$type} }) {
-        my ($lat, $lng) = ($ship->{latitude}, $ship->{longitude});
-        warn "Checking $lat, $lng ...\n";
+        my ($lat, $lng) = ($ship->{lat}, $ship->{lng});
+        warn "Checking $ship->{name} at $lat, $lng ...\n";
         next unless $polygon->contains([$lat, $lng]);
         say "Found $ship->{name} in the Burrard Inlet!";
         say $ship->{detail_url};
-        notify_about($ship);
+        my $notify_key = "$ship->{mmsi}_notify_time";
+
+        if (my $time = $redis->get($notify_key)) {
+            say "Recently notified about $ship->{name}, skipping ...";
+            next;
+        }
+
+        $notifier->notify($ship);
+        $redis->set($notify_key, time);
     }
 }
 
 
 exit;
-
-sub notify_about {
-    my $ship = shift;
-}
 
 sub load_polygon {
     return Math::Polygon->new(
@@ -34,6 +43,4 @@ sub load_polygon {
             [49.303078,-123.026962],
     );
 }
-use Data::Dumper;
-warn Dumper $data;
 

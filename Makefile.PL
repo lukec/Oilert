@@ -22,6 +22,7 @@ WriteMakefile(
         'Redis'      => 0,
         'WWW::Shorten::Googl' => 0,
         'Template' => 2.22,
+        'Number::Phone' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Oilert-*' },

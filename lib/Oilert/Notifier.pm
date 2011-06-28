@@ -83,7 +83,7 @@ method notify {
         'SMS/Messages',
         From => $self->config->{sms_number},
         To => $to,
-        Body => "$ship->{name} $reason - $link",
+        Body => "$ship->{type} ship '$ship->{name}' $reason - $link",
     );
     say "$resp->{content}";
 }

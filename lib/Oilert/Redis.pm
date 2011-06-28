@@ -24,8 +24,9 @@ method get_json {
     
 
 method _build_redis {
-    if (-e "environment.json") {
-        open(my $fh, "environment.json");
+    my $env_file = "/home/dotcloud/environment.json";
+    if (-e $env_file) {
+        open(my $fh, $env_file);
         local $/ = undef;
         my $json = <$fh>;
 

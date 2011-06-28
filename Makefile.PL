@@ -16,6 +16,7 @@ WriteMakefile(
         'YAML'       => 0,
         'Dancer'     => 1.3060,
         'Plack'      => 0,
+        'Math::Polygon' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'oilert-*' },

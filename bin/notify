@@ -1,0 +1,39 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use YAML q/LoadFile/;
+use Math::Polygon;
+
+my $data = LoadFile('data/ships.yaml') or die "Couldn't load the Yaml!";
+my $polygon = load_polygon();
+
+for my $type (keys %$data) {
+    for my $ship (@{ $data->{$type} }) {
+        my ($lat, $lng) = ($ship->{latitude}, $ship->{longitude});
+        warn "Checking $lat, $lng ...\n";
+        next unless $polygon->contains([$lat, $lng]);
+        say "Found $ship->{name} in the Burrard Inlet!";
+        say $ship->{detail_url};
+        notify_about($ship);
+    }
+}
+
+
+exit;
+
+sub notify_about {
+    my $ship = shift;
+}
+
+sub load_polygon {
+    return Math::Polygon->new(
+            [49.303078,-123.026962],
+            [49.310909,-122.984734],
+            [49.311134,-122.923279],
+            [49.286957,-122.918472],
+            [49.287403,-123.026962],
+            [49.303078,-123.026962],
+    );
+}
+use Data::Dumper;
+warn Dumper $data;
+

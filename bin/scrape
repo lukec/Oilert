@@ -53,4 +53,5 @@ for my $type (qw/Cargo Tanker/) {
     $data{$type} = [ grep { $polygon->contains([$_->{lat}, $_->{lng}]) } @$ships ];
 }
 
+$data{update_time} = time;
 DumpFile('data/ships.yaml', \%data);

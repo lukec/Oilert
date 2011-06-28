@@ -25,6 +25,7 @@
 
         <div id="ships">
           <h1>Ships in Burrard Inlet Right Now</h1>
+          <p><i>(Last updated at [% update_time %])</i></p>
                     
           [% IF ships.size == 0 %]
             <p>No ships are in the Burrard Inlet right now.</p>

@@ -3,15 +3,19 @@ use Dancer ':syntax';
 use YAML qw/LoadFile/;
 use Oilert::Redis;
 use Number::Phone;
+use DateTime;
 
 our $VERSION = '0.1';
 
 get '/' => sub {
     my $data = LoadFile("data/ships.yaml");
+    my $time = DateTime->from_epoch(epoch => $data->{update_time});
+    $time->set_time_zone("America/Vancouver");
 
     template 'index', {
         ships => [ @{ $data->{Tanker} }, @{ $data->{Cargo} } ],
         message => params->{message},
+        update_time => $time,
     };
 };
 

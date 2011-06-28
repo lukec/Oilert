@@ -17,7 +17,7 @@ method check {
     my @to_notify;
     my %seen;
     for my $type (keys %$data) {
-        next unless ref($data{$type});
+        next unless ref($data->{$type});
         for my $ship (@{ $data->{$type} }) {
             $seen{ $ship->{mmsi} } ||= $ship;
 #            say "Checking $ship->{name} ... $ship->{detail_url}";

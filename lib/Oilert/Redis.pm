@@ -31,7 +31,9 @@ method _build_redis {
         my $json = <$fh>;
 
         my $env = decode_json($json);
-        Redis->new(server => $env->{DOTCLOUD_MYREDIS_REDIS_URL});
+        my $server = $env->{DOTCLOUD_MYREDIS_REDIS_URL};
+        $server =~ s#^redis://##;
+        Redis->new(server => $server);
     }
     else {
         Redis->new

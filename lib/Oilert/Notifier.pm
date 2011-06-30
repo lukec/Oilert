@@ -6,6 +6,7 @@ use WWW::Twilio::API;
 use YAML qw/LoadFile/;
 use Oilert::Redis;
 use WWW::Shorten 'Googl';
+use FindBin;
 
 has 'config' => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 has 'twilio' => (is => 'ro', isa => 'WWW::Twilio::API', lazy_build => 1);
@@ -101,7 +102,9 @@ method clear_state {
 }
 
 method _build_config {
-    LoadFile('etc/twilio.yaml') or die "Can't load twilio config";
+    my $file = "/home/dotcloud/twilio.yaml";
+    $file = "$FindBin::Bin/../etc/twilio.yaml" unless -e $file;
+    return LoadFile($file) or die "Can't load twilio config";
 }
 
 method _build_twilio {

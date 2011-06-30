@@ -28,8 +28,8 @@ method _build_redis {
     if (-e $env_file) {
         my $env = load_env($env_file);
         my $server = $env->{DOTCLOUD_MYREDIS_REDIS_URL};
-        $server =~ s#^redis://redis:##;
-        (my $pass = $server) =~ s/^(.+?)\@.+/$1/;
+        $server =~ s#^redis://redis:(.+?)\@##;
+        my $pass = $1;
 
         my $r = Redis->new(server => $server);
         $r->auth($pass);

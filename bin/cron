@@ -4,7 +4,7 @@ use warnings;
 use FindBin;
 
 sleep(rand(180));
-$ENV{PERL5LIB} .= ":/home/dotcloud/current/lib";
-system("$^X $FindBin::Bin/scrape");
-system("$^X $FindBin::Bin/notify");
+my $lib = "/home/dotcloud/current/lib";
+system("$^X -I$lib $FindBin::Bin/scrape");
+system("$^X -I$lib $FindBin::Bin/notify");
 

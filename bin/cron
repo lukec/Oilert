@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use FindBin;
 
-sleep(rand(180));
+# sleep(rand(180));
 my $lib = "/home/dotcloud/current/lib";
 system("$^X -I$lib -I/home/dotcloud/perl5/lib/perl5 $FindBin::Bin/scrape");
 system("$^X -I$lib -I/home/dotcloud/perl5/lib/perl5 $FindBin::Bin/notify");

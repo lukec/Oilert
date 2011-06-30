@@ -28,9 +28,11 @@ method _build_redis {
     if (-e $env_file) {
         my $env = load_env($env_file);
         my $server = $env->{DOTCLOUD_MYREDIS_REDIS_URL};
-        $server =~ s#^redis://##;
+        $server =~ s#^redis://redis:##;
+        (my $pass = $server) =~ s/^(.+?)\@.+/$1/;
+
         my $r = Redis->new(server => $server);
-        $r->auth($env->{REDIS_PASSWORD});
+        $r->auth($pass);
         return $r;
     }
     else {
@@ -45,12 +47,5 @@ sub load_env {
     my $json = <$fh>;
     close $fh;
 
-    my $env = decode_json($json);
-
-    # Hack to work around dotcloud bug:
-    open($fh, "/home/dotcloud/redis-environment.json");
-    $json = <$fh>;
-    my $redis_env = decode_json($json);
-    $env->{REDIS_PASSWORD} = $redis_env->{password};
-    return $env;
+    return decode_json($json);
 }

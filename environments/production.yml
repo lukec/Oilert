@@ -1,10 +1,10 @@
 # configuration file for production environment
 
 # only log warning and error messsages
-log: "debug"
+log: "warning"
 
 # log message to a file in logs/
-logger: "console"
+logger: "file"
 
 # don't consider warnings critical
 warnings: 1

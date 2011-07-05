@@ -65,4 +65,6 @@ for my $type (qw/Tanker/) {
 }
 
 $data{update_time} = time;
-DumpFile("$FindBin::Bin/../data/ships.yaml", \%data);
+my $dir = "$FindBin::Bin/../data";
+mkdir $dir unless -d $dir;
+DumpFile("$dir/ships.yaml", \%data);

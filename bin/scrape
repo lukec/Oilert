@@ -36,6 +36,7 @@ my $polygon = Math::Polygon->new(
 my %data;
 for my $type (qw/Tanker/) {
     my $uri = "http://www.marinetraffic.com/ais/datasheet.aspx?TYPE_SUMMARY=$type&PORT_ID=682&datasource=SHIPS_CURRENT&B1=Search";
+    warn "Fetching $uri at " . localtime;
     my $resp = $ua->get($uri);
     if (! $resp->is_success) {
         die "Failed to scrape $uri - " . $resp->status_line;

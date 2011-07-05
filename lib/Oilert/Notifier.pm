@@ -80,7 +80,7 @@ method notify {
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
     my $link = makeashorterlink($ship->{detail_url});
-    my $msg = "Ship '$ship->{name}' $reason - $link";
+    my $msg = "Ship '$ship->{name}' $reason - $link - Take Action: 604-683-8220";
 
     debug "Notification: '$msg'";
 

@@ -14,7 +14,7 @@ get '/' => sub {
     $time->set_time_zone("America/Vancouver");
 
     template 'index', {
-        ships => [ @{ $data->{Tanker} }, @{ $data->{Cargo} } ],
+        ships => [ @{ $data->{Tanker} || [] }, @{ $data->{Cargo} || [] } ],
         message => params->{message},
         update_time => $time,
     };

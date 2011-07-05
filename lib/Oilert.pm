@@ -50,6 +50,7 @@ post '/notify' => sub {
             "You are now un-subscribed. Call 604-683-8220 for help."
         );
     }
+    debug $message;
 
     forward '/', { message => $message }, { method => 'GET' };
 };

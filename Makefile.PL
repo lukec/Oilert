@@ -17,7 +17,7 @@ WriteMakefile(
         'Dancer'     => 1.3060,
         'Plack'      => 0,
         'Math::Polygon' => 0,
-        'WWW::Twilio::API' => 0,
+        'URI::Encode' => 0,
         'methods'    => 0,
         'Redis'      => 0,
         'WWW::Shorten::Googl' => 0,

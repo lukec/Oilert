@@ -2,15 +2,15 @@ package Oilert::Notifier;
 use 5.12.0;
 use methods;
 use Moose;
-use WWW::Twilio::API;
 use YAML qw/LoadFile/;
 use Oilert::Redis;
 use WWW::Shorten 'Googl';
 use FindBin;
 use Net::Twitter;
+use LWP::Simple qw/get/;
+use URI::Encode qw/uri_encode/;
 
 has 'config' => (is => 'ro', isa => 'HashRef', lazy_build => 1);
-has 'twilio' => (is => 'ro', isa => 'WWW::Twilio::API', lazy_build => 1);
 has 'twitter' => (is => 'ro', isa => 'Net::Twitter', lazy_build => 1);
 has 'redis'  => (is => 'ro', isa => 'Oilert::Redis', lazy_build => 1);
 
@@ -102,12 +102,9 @@ method send_sms_to {
     my $to = shift;
     my $body = shift;
 
-    $self->twilio->POST(
-        'SMS/Messages',
-        From => $self->config->{twilio_sms_number},
-        To => $to,
-        Body => $body,
-    );
+    my $token = $self->config->{tropo_app_token};
+    get("http://api.tropo.com/1.0/sessions?action=create&token=$token"
+        . "&numberToDial=$to&msg=" . uri_encode($body, 1));
 }
 
 method clear_state {
@@ -122,14 +119,6 @@ method _build_config {
     $file = "$FindBin::Bin/etc/services.yaml" unless -e $file;
     $file = "$FindBin::Bin/../etc/services.yaml" unless -e $file;
     return LoadFile($file) or die "Can't load services config";
-}
-
-method _build_twilio {
-    return WWW::Twilio::API->new(
-        API_VERSION => '2010-04-01',
-        AccountSid => $self->config->{twilio_account_sid},
-        AuthToken => $self->config->{twilio_auth_token},
-    );
 }
 
 method _build_twitter {

@@ -1,5 +1,6 @@
 package Oilert::Notifier;
 use 5.12.0;
+use Dancer ':syntax';
 use methods;
 use Moose;
 use YAML qw/LoadFile/;
@@ -102,9 +103,12 @@ method send_sms_to {
     my $to = shift;
     my $body = shift;
 
+    $to =~ s/^\+1//;
     my $token = $self->config->{tropo_app_token};
-    get("http://api.tropo.com/1.0/sessions?action=create&token=$token"
-        . "&numberToDial=$to&msg=" . uri_encode($body, 1));
+    my $uri = "http://api.tropo.com/1.0/sessions?action=create&token=$token"
+        . "&numberToDial=$to&msg=" . uri_encode($body, 1);
+    debug "Fetching $uri";
+    get($uri) or die "Couldn't fetch $uri";
 }
 
 method clear_state {

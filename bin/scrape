@@ -1,12 +1,17 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+use Dancer ':syntax';
 use URI;
 use Web::Scraper;
 use YAML qw/DumpFile/;
 use Math::Polygon;
 use FindBin;
 use LWP::UserAgent;
+use Cwd qw/realpath/;
+
+Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
+Dancer::Config::load();
 
 my $ua = LWP::UserAgent->new(agent =>
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.112 Safari/534.30"
@@ -36,7 +41,7 @@ my $polygon = Math::Polygon->new(
 my %data;
 for my $type (qw/Tanker/) {
     my $uri = "http://www.marinetraffic.com/ais/datasheet.aspx?TYPE_SUMMARY=$type&PORT_ID=682&datasource=SHIPS_CURRENT&B1=Search";
-    warn "Fetching $uri at " . localtime;
+    debug "Fetching $uri at " . localtime;
     my $resp = $ua->get($uri);
     if (! $resp->is_success) {
         die "Failed to scrape $uri - " . $resp->status_line;
@@ -60,6 +65,7 @@ for my $type (qw/Tanker/) {
         else {
             die "Couldn't find lat,lng for $s->{name}";
         }
+        debug "Scraped ship $s->{name} - $s->{mmsi}";
     }
     $data{$type} = [ grep { $polygon->contains([$_->{lat}, $_->{lng}]) } @$ships ];
 }

@@ -4,6 +4,11 @@ use YAML q/LoadFile/;
 use lib 'lib';
 use Oilert::Notifier;
 use FindBin;
+use Dancer ':syntax';
+use Cwd qw/realpath/;
+
+Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
+Dancer::Config::load();
 
 my $data = LoadFile("$FindBin::Bin/../data/ships.yaml") or die "Couldn't load the Yaml!";
 my $notifier = Oilert::Notifier->new;

@@ -7,7 +7,7 @@ use Oilert::Redis;
 use WWW::Shorten 'Googl';
 use FindBin;
 use Net::Twitter;
-use LWP::Simple qw/get/;
+use LWP::Simple ();
 use URI::Encode qw/uri_encode/;
 use methods;
 
@@ -82,6 +82,8 @@ method notify {
     my $link = makeashorterlink($ship->{detail_url});
     my $msg = "Ship '$ship->{name}' $reason - $link";
 
+    debug "Notification: '$msg'";
+
     $self->twitter->update({
         status => $msg, 
         lat => $ship->{lat},
@@ -94,7 +96,7 @@ method notify {
         return;
     }
     for my $to (@recipients) {
-        warn "Notifying $to about $ship->{name}\n";
+        debug "Notifying $to about $ship->{name}\n";
         $self->send_sms_to( $to, $msg);
     }
 }
@@ -108,7 +110,7 @@ method send_sms_to {
     my $uri = "http://api.tropo.com/1.0/sessions?action=create&token=$token"
         . "&numberToDial=$to&msg=" . uri_encode($body, 1);
     debug "Fetching $uri";
-    get($uri) or die "Couldn't fetch $uri";
+    LWP::Simple::get($uri) or die "Couldn't fetch $uri";
 }
 
 method clear_state {

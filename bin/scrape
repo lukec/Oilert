@@ -6,6 +6,11 @@ use Web::Scraper;
 use YAML qw/DumpFile/;
 use Math::Polygon;
 use FindBin;
+use LWP::UserAgent;
+
+my $ua = LWP::UserAgent->new(agent =>
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.112 Safari/534.30"
+);
 
 my $ship_scraper = scraper {
     process "table tr", "ships[]" => scraper {
@@ -31,7 +36,11 @@ my $polygon = Math::Polygon->new(
 my %data;
 for my $type (qw/Tanker/) {
     my $uri = "http://www.marinetraffic.com/ais/datasheet.aspx?TYPE_SUMMARY=$type&PORT_ID=682&datasource=SHIPS_CURRENT&B1=Search";
-    my $ships = $ship_scraper->scrape(URI->new($uri)) || [];
+    my $resp = $ua->get($uri);
+    if (! $resp->is_success) {
+        die "Failed to scrape $uri - " . $resp->status_line;
+    }
+    my $ships = $ship_scraper->scrape($resp) || [];
     $ships = [ grep { keys %$_ and $_->{speed} ne 'Speed' } @$ships ];
     for my $s (@$ships) {
         for (qw/map_url detail_url/) {

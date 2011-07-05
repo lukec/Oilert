@@ -81,7 +81,11 @@ method notify {
     my $link = makeashorterlink($ship->{detail_url});
     my $msg = "Ship '$ship->{name}' $reason - $link";
 
-    $self->twitter->update($msg, $ship->{lat}, $ship->{lng});
+    $self->twitter->update({
+        status => $msg, 
+        lat => $ship->{lat},
+        long => $ship->{lng}
+    });
 
     my @recipients = $self->redis->smembers('notify');
     if (!@recipients) {
@@ -129,11 +133,14 @@ method _build_twilio {
 }
 
 method _build_twitter {
-    return Net::Twitter->new(
-        traits => ['API::REST'],
+    my $t = Net::Twitter->new(
+        traits => ['API::REST', 'OAuth'],
         consumer_key => $self->config->{twitter_consumer_key},
         consumer_secret => $self->config->{twitter_consumer_secret},
     );
+    $t->access_token($self->config->{twitter_access_token});
+    $t->access_token_secret($self->config->{twitter_access_token_secret});
+    return $t;
 }
 
 method _build_redis { Oilert::Redis->new }

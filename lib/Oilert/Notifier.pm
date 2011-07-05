@@ -111,6 +111,7 @@ method clear_state {
 
 method _build_config {
     my $file = "/home/dotcloud/twilio.yaml";
+    $file = "$FindBin::Bin/etc/twilio.yaml" unless -e $file;
     $file = "$FindBin::Bin/../etc/twilio.yaml" unless -e $file;
     return LoadFile($file) or die "Can't load twilio config";
 }

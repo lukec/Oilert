@@ -7,9 +7,11 @@ use YAML qw/LoadFile/;
 use Oilert::Redis;
 use WWW::Shorten 'Googl';
 use FindBin;
+use Net::Twitter;
 
 has 'config' => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 has 'twilio' => (is => 'ro', isa => 'WWW::Twilio::API', lazy_build => 1);
+has 'twitter' => (is => 'ro', isa => 'Net::Twitter', lazy_build => 1);
 has 'redis'  => (is => 'ro', isa => 'Oilert::Redis', lazy_build => 1);
 
 method check {
@@ -77,6 +79,9 @@ method notify {
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
     my $link = makeashorterlink($ship->{detail_url});
+    my $msg = "Ship '$ship->{name}' $reason - $link";
+
+    $self->twitter->update($msg, $ship->{lat}, $ship->{lng});
 
     my @recipients = $self->redis->smembers('notify');
     if (!@recipients) {
@@ -85,8 +90,7 @@ method notify {
     }
     for my $to (@recipients) {
         warn "Notifying $to about $ship->{name}\n";
-        $self->send_sms_to( $to,
-          "$ship->{type} ship '$ship->{name}' $reason - $link");
+        $self->send_sms_to( $to, $msg);
     }
 }
 
@@ -96,7 +100,7 @@ method send_sms_to {
 
     $self->twilio->POST(
         'SMS/Messages',
-        From => $self->config->{sms_number},
+        From => $self->config->{twilio_sms_number},
         To => $to,
         Body => $body,
     );
@@ -110,17 +114,25 @@ method clear_state {
 }
 
 method _build_config {
-    my $file = "/home/dotcloud/twilio.yaml";
-    $file = "$FindBin::Bin/etc/twilio.yaml" unless -e $file;
-    $file = "$FindBin::Bin/../etc/twilio.yaml" unless -e $file;
-    return LoadFile($file) or die "Can't load twilio config";
+    my $file = "/home/dotcloud/services.yaml";
+    $file = "$FindBin::Bin/etc/services.yaml" unless -e $file;
+    $file = "$FindBin::Bin/../etc/services.yaml" unless -e $file;
+    return LoadFile($file) or die "Can't load services config";
 }
 
 method _build_twilio {
     return WWW::Twilio::API->new(
         API_VERSION => '2010-04-01',
-        AccountSid => $self->config->{account_sid},
-        AuthToken => $self->config->{auth_token},
+        AccountSid => $self->config->{twilio_account_sid},
+        AuthToken => $self->config->{twilio_auth_token},
+    );
+}
+
+method _build_twitter {
+    return Net::Twitter->new(
+        traits => ['API::REST'],
+        consumer_key => $self->config->{twitter_consumer_key},
+        consumer_secret => $self->config->{twitter_consumer_secret},
     );
 }
 

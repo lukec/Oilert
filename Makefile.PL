@@ -26,6 +26,7 @@ WriteMakefile(
         'Web::Scraper' => 0,
         'DateTime' => 0,
         'URI' => 0,
+        'Net::Twitter' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Oilert-*' },

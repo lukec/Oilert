@@ -34,7 +34,7 @@ post '/notify' => sub {
     elsif (my $stop_num = get_number('stop_number')) {
         $message = "Stopped notifications for $stop_num";
         $redis->srem('notify', $stop_num);
-        $notifier->send_sms_to( $start_num,
+        $notifier->send_sms_to( $stop_num,
             "You are now un-subscribed. Call 604-683-8220 for help."
         );
     }

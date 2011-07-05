@@ -11,6 +11,7 @@ use LWP::UserAgent;
 use Cwd qw/realpath/;
 
 Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
+config->{environment} = 'production' if -d '/home/dotcloud';
 Dancer::Config::load();
 
 my $ua = LWP::UserAgent->new(agent =>

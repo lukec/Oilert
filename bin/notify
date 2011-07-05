@@ -8,6 +8,7 @@ use Dancer ':syntax';
 use Cwd qw/realpath/;
 
 Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
+config->{environment} = 'production' if -d '/home/dotcloud';
 Dancer::Config::load();
 
 my $data = LoadFile("$FindBin::Bin/../data/ships.yaml") or die "Couldn't load the Yaml!";

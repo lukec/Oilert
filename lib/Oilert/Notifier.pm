@@ -1,7 +1,6 @@
 package Oilert::Notifier;
 use 5.12.0;
 use Dancer ':syntax';
-use methods;
 use Moose;
 use YAML qw/LoadFile/;
 use Oilert::Redis;
@@ -10,6 +9,7 @@ use FindBin;
 use Net::Twitter;
 use LWP::Simple qw/get/;
 use URI::Encode qw/uri_encode/;
+use methods;
 
 has 'config' => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 has 'twitter' => (is => 'ro', isa => 'Net::Twitter', lazy_build => 1);

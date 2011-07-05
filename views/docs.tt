@@ -1,0 +1,38 @@
+        <div id="docs">
+          <h1>Documentation for Embedding</h1>
+          <p>There are several ways this site can be embedded in other sites.  This page lists a few.</p>
+          <hr />
+          <h2>Twitter Feed Embedding</h2>
+          <p>
+            This site tweets updates to the <a href="http://twitter.com/BurrardInletOil">@BurrardInletOil</a> twitter account.  You can embed that tweetstream using the following code.  Use the Twitter <a href="http://twitter.com/about/resources/widgets/widget_profile">Profile Widget Tool</a> to create a widget.
+          </p>
+          <hr />
+          <h2>Embedded Sign-up and Sign-off</h2>
+          <p>
+            You can use an iframe to include just the form to subscribe or unsubscribe from the SMS notification service.
+            </p>
+            <iframe src="/form" width="400" height="350"></iframe>
+            <p>
+            Code:<br />
+            <code>
+            &lt;iframe src="http://bc1e13ef.dotcloud.com/form" width="400" height="350">&lt;/iframe>
+            </code><br />
+          </p>
+          <p>
+            Note that you may produce this form directly on your own site. Simply view the source of <a href="http://bc1e13ef.dotcloud.com/form">the form</a> and use a similar form on your site.  The form just expects a signup_number or a stop_number POST parameter.
+          </p>
+          <hr />
+          <h2>Ship List IFrame</h2>
+          <p>
+            You can use an iframe to embed the list of ships currently in the Burrard Inlet east of the Second Narrows.
+            </p>
+            <iframe src="/ships" width="400" height="200"></iframe>
+            <p>
+            Code:<br />
+            <code>
+            &lt;iframe src="http://bc1e13ef.dotcloud.com/ships" width="400" height="200">&lt;/iframe>
+            </code><br />
+            </p>
+            <hr />
+            <p>The Embedded iframes are without CSS styling, so you will need to style them appropriately for your site.  <a href="http://stackoverflow.com/questions/217776/how-to-apply-css-to-iframe">Here are some tips</a> to style an embedded Iframe.  If you need any help or changes, please contact Luke.</p>
+        </div>

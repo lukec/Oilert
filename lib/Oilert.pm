@@ -9,16 +9,28 @@ use DateTime;
 our $VERSION = '0.1';
 
 get '/' => sub {
+    my $data = ships();
+    template 'index', {
+        ships => $data->{ships},
+        message => params->{message},
+        update_time => $data->{update_time},
+    };
+};
+
+sub ships {
     my $data = LoadFile("data/ships.yaml");
     my $time = DateTime->from_epoch(epoch => $data->{update_time});
     $time->set_time_zone("America/Vancouver");
 
-    template 'index', {
-        ships => [ @{ $data->{Tanker} || [] }, @{ $data->{Cargo} || [] } ],
-        message => params->{message},
+    return {
+        ships => $data->{Tanker} || [],
         update_time => $time,
     };
-};
+}
+
+get '/docs'  => sub { template 'docs' };
+get '/form'  => sub { template 'form', {}, {layout => undef} };
+get '/ships' => sub { template 'ships', ships(), {layout => undef} };
 
 post '/notify' => sub {
     my $redis = Oilert::Redis->new;

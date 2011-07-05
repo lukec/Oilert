@@ -1,0 +1,21 @@
+        <div id="ships">
+          <h1>Ships in Burrard Inlet Right Now</h1>
+                    
+          [% IF ships.size == 0 %]
+            <p>No ships are in the Burrard Inlet right now.</p>
+          [% ELSE %]
+            <ul>
+            [% FOREACH ship IN ships %]
+              <li><a href="[% ship.detail_url %]">[% ship.name %]</a> - [% ship.type %]
+                  - 
+                  [% IF ship.speed > 0.5 %]
+                    Moving at [% ship.speed %] knots
+                  [% ELSE %]
+                    Stopped
+                  [% END %]
+                  - (<a href="[% ship.map_url %]">map</a>)</li>
+            [% END %]
+            </ul>
+          [% END %]
+          <p><i>(Last updated at [% update_time %])</i></p>
+        </div>

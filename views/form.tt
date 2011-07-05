@@ -1,0 +1,20 @@
+        <div id="notify-admin">
+          <h1>Notifications</h1>
+          <form action="/notify" method="POST">
+          <h2>Notify me!</h2>
+          <p>Sign up for text messages when ships arrive, leave, stop or start moving.</p>
+          <input type="text" name="signup_number" value="Your Mobile Number" />
+          <input id="submit_btn" type="submit" value="Start!" />
+          <h2>Stop notifying me!</h2>
+          <p>Had enough? Enter your number to stop notifications.</p>
+          <input type="text" name="stop_number" value="Your Mobile Number" />
+          <input id="submit_btn" type="submit" value="Stop!" />
+          </form>
+        </div>
+      <script>
+          $(function() {
+              $('input[type=text]').focus(function() {
+                $(this).val('');
+              });
+           });
+      </script>

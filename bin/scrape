@@ -9,6 +9,7 @@ use Math::Polygon;
 use FindBin;
 use LWP::UserAgent;
 use Cwd qw/realpath/;
+use URI::Encode qw/uri_encode/;
 
 Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
 config->{environment} = 'production' if -d '/home/dotcloud';
@@ -66,6 +67,8 @@ for my $type (qw/Tanker/) {
         else {
             die "Couldn't find lat,lng for $s->{name}";
         }
+        $s->{google_url} = 'http://www.google.ca/#q='
+                           . uri_encode($s->{name}) . "+$s->{mmsi}";
         debug "Scraped ship $s->{name} - $s->{mmsi}";
     }
     $data{$type} = [ grep { $polygon->contains([$_->{lat}, $_->{lng}]) } @$ships ];

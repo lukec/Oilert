@@ -13,7 +13,9 @@
                   [% ELSE %]
                     Stopped
                   [% END %]
-                  - (<a href="[% ship.map_url %]">map</a>)</li>
+                  - (<a href="[% ship.map_url %]">map</a>)
+                  - (<a href="[% ship.google_url %]">Google</a>)
+              </li>
             [% END %]
             </ul>
           [% END %]

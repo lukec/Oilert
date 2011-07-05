@@ -85,13 +85,21 @@ method notify {
     }
     for my $to (@recipients) {
         warn "Notifying $to about $ship->{name}\n";
-        my $resp = $self->twilio->POST(
-            'SMS/Messages',
-            From => $self->config->{sms_number},
-            To => $to,
-            Body => "$ship->{type} ship '$ship->{name}' $reason - $link",
-        );
+        $self->send_sms_to( $to,
+          "$ship->{type} ship '$ship->{name}' $reason - $link");
     }
+}
+
+method send_sms_to {
+    my $to = shift;
+    my $body = shift;
+
+    $self->twilio->POST(
+        'SMS/Messages',
+        From => $self->config->{sms_number},
+        To => $to,
+        Body => $body,
+    );
 }
 
 method clear_state {

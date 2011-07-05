@@ -2,6 +2,7 @@ package Oilert;
 use Dancer ':syntax';
 use YAML qw/LoadFile/;
 use Oilert::Redis;
+use Oilert::Notifier;
 use Number::Phone;
 use DateTime;
 
@@ -21,14 +22,21 @@ get '/' => sub {
 
 post '/notify' => sub {
     my $redis = Oilert::Redis->new;
+    my $notifier = Oilert::Notifier->new;
     my $message = "No action taken.";
     if (my $start_num = get_number('signup_number')) {
         $message = "Added notifications for $start_num";
+        $notifier->send_sms_to( $start_num,
+            "You are now subscribed to Burrard Inlet Oil Tanker Traffic notifications. Call 604-683-8220 for help."
+        );
         $redis->sadd('notify', $start_num);
     }
     elsif (my $stop_num = get_number('stop_number')) {
         $message = "Stopped notifications for $stop_num";
         $redis->srem('notify', $stop_num);
+        $notifier->send_sms_to( $start_num,
+            "You are now un-subscribed. Call 604-683-8220 for help."
+        );
     }
 
     forward '/', { message => $message }, { method => 'GET' };

@@ -90,7 +90,7 @@ method notify {
     my $link = makeashorterlink($ship->{detail_url});
     my $msg = "Ship '$ship->{name}' $reason - $link - Take Action: 604-683-8220";
 
-    debug "Notification: '$msg'";
+    debug "Notification: '$msg' (length: " . length($msg). ")";
 
     $self->twitter->update({
         status => $msg, 

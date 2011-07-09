@@ -10,6 +10,7 @@ use Net::Twitter;
 use LWP::Simple ();
 use URI::Encode qw/uri_encode/;
 use methods;
+use DateTime;
 
 has 'config' => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 has 'twitter' => (is => 'ro', isa => 'Net::Twitter', lazy_build => 1);
@@ -23,40 +24,47 @@ method check {
     for my $type (keys %$data) {
         next unless ref($data->{$type});
         for my $ship (@{ $data->{$type} }) {
-            $seen{ $ship->{mmsi} } ||= $ship;
-#            say "Checking $ship->{name} ... $ship->{detail_url}";
-            if ($self->redis->sismember("ships_in_bi", $ship->{mmsi})) {
-                # ship was already in BI
-                my $prev_state = $self->redis->get_json($ship->{mmsi});
+            my $mmsi = $ship->{mmsi};
+            $seen{ $mmsi } ||= $ship;
+            debug "Checking $ship->{name} ... $ship->{detail_url}";
 
-                # Check if it stopped or started moving
-                my $is_moving = $ship->{speed} > 0.5;
-                my $was_moving = $prev_state->{speed} > 0.5;
-                my $reason;
-                if ($is_moving and not $was_moving) {
-                    $reason = "started moving";
-                }
-                elsif ($was_moving and not $is_moving) {
-                    $reason = "stopped moving";
-                }
-                if ($reason) {
-                    push @to_notify, {
-                        reason => $reason,
-                        ship => $ship,
-                    };
-                }
-            }
-            else {
+            # Notice ships coming into the second narrows
+            if (not $self->redis->sismember("ships_in_bi", $mmsi)) {
                 # Just came into BI - notify
                 push @to_notify, {
                     reason => "entered the Burrard Inlet",
                     ship   => $ship,
                 };
-                $self->redis->sadd("ships_in_bi", $ship->{mmsi});
+                $self->redis->sadd("ships_in_bi", $mmsi);
+            }
+
+            # Check for ships filling up at Westridge Marine Terminal
+            if ($self->redis->sismember("ships_at_WRMT", $mmsi)) {
+                if (!$ship->{near_wrmt}) {
+                    # Ship has just left westridge marine terminal
+                    $ship->{full_of_oil}++;
+                    my $next_ebb = next_ebb_tide();
+                    my $ebb_t = join ':', $next_ebb->hour, $next_ebb->minute;
+                    push @to_notify, {
+                        reason => "filled up with oil, probably will leave at $ebb_t",
+                        ship => $ship,
+                    };
+                    $self->redis->srem("ships_at_WRMT", $mmsi);
+                }
+            }
+            else {
+                if ($ship->{near_wrmt}) {
+                    # Ship just arrived at WRMT
+                    push @to_notify, {
+                        reason => "docked at Westridge",
+                        ship => $ship,
+                    };
+                    $self->redis->sadd("ships_at_WRMT", $mmsi);
+                }
             }
 
             # Regardless, update the ship's state
-            $self->redis->set_json($ship->{mmsi}, $ship);
+            $self->redis->set_json($mmsi, $ship);
         }
     }
 
@@ -98,6 +106,33 @@ method notify {
     for my $to (@recipients) {
         debug "Notifying $to about $ship->{name}\n";
         $self->send_sms_to( $to, $msg);
+    }
+}
+
+sub next_ebb_tide {
+    my $now = DateTime->now;
+    $now->set_time_zone('America/Vancouver');
+
+    my $content = LWP::Simple::get(
+        'http://tbone.biol.sc.edu/tide/tideshow.cgi?type=table;'
+        . 'tplotdir=horiz;cleanout=1;glen=3;'
+        . 'site=Second%20Narrows%2C%20British%20Columbia%20Current'
+    );
+    for my $line (split "\n", $content) {
+        next unless $line =~ m/(\d+)-(\d+)-(\d+)\s+(\d+):(\d+)\s+\w+\s+[\d\-\.]+\s+knots\s+Slack, Ebb Begins$/;
+        my $dt = DateTime->new(
+            year => $1, month => $2, day => $3,
+            hour => $4, minute => $5,
+        );
+        $dt->set_time_zone('America/Vancouver');
+
+        # Skip high tides that already happened
+        next unless $dt > $now;
+
+        # Skip high tides that are at night
+        next if $dt->hour < 6 or $dt->hour > 22;
+
+        return $dt;
     }
 }
 

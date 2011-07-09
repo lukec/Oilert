@@ -30,14 +30,24 @@ my $ship_scraper = scraper {
     result 'ships';
 };
 
-# Only save ships that are in the burrard inlet
-my $polygon = Math::Polygon->new(
-    [49.303078,-123.026962],
+my $East_of_second_narrows = Math::Polygon->new(
+    [49.302181,-123.002930],
     [49.310909,-122.984734],
-    [49.311134,-122.923279],
-    [49.286957,-122.918472],
-    [49.287403,-123.026962],
-    [49.303078,-123.026962],
+    [49.318298,-122.938385],
+    [49.294456,-122.835388],
+    [49.279118,-122.857536],
+    [49.290314,-122.997093],
+    [49.302181,-123.002930],
+);
+
+my $Near_WRMT = Math::Polygon->new(
+    [49.287514,-122.967735],
+    [49.287041,-122.961304],
+    [49.292610,-122.945763],
+    [49.294315,-122.947739],
+    [49.292023,-122.959068],
+    [49.291630,-122.966881],
+    [49.287514,-122.967735],
 );
 
 my %data;
@@ -69,9 +79,10 @@ for my $type (qw/Tanker/) {
         }
         $s->{google_url} = 'http://www.google.ca/#q='
                            . uri_encode($s->{name}) . "+$s->{mmsi}";
+        $s->{near_wrmt} = $Near_WRMT->contains([$s->{lat}, $s->{lng}]) ? 1 : 0;
         debug "Scraped ship $s->{name} - $s->{mmsi}";
     }
-    $data{$type} = [ grep { $polygon->contains([$_->{lat}, $_->{lng}]) } @$ships ];
+    $data{$type} = [ grep { $East_of_second_narrows->contains([$_->{lat}, $_->{lng}]) } @$ships ];
 }
 
 $data{update_time} = time;

@@ -63,6 +63,11 @@ method check {
                 }
             }
 
+            # Remember if the ship filled up already.
+            if (my $oldship = $self->redis->get_json($mmsi)) {
+                $ship->{full_of_oil} ||= $oldship->{full_of_oil};
+            }
+
             # Regardless, update the ship's state
             $self->redis->set_json($mmsi, $ship);
         }
@@ -71,13 +76,19 @@ method check {
     my @all_known = $self->redis->smembers("ships_in_bi");
     for my $mmsi (@all_known) {
         next if $seen{$mmsi};
+        my $ship = $self->redis->get_json($mmsi);
+        my $reason = '';
+        $reason = " full of oil" if $ship->{full_of_oil};
 
         # This ship wasn't seen, so it has left the BI
         push @to_notify, {
-            reason => "left the Burrard Inlet",
+            reason => "left the Burrard Inlet$reason",
             ship => $self->redis->get_json($mmsi),
         };
         $self->redis->srem('ships_in_bi', $mmsi);
+
+        # For now, do not remember ships that have left the area.
+        $self->redis->del($mmsi);
     }
 
     return \@to_notify;

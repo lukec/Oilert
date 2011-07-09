@@ -13,7 +13,7 @@ use methods;
 use DateTime;
 
 has 'config' => (is => 'ro', isa => 'HashRef', lazy_build => 1);
-has 'twitter' => (is => 'ro', isa => 'Net::Twitter', lazy_build => 1);
+has 'twitter' => (is => 'ro', isa => 'Maybe[Net::Twitter]', lazy_build => 1);
 has 'redis'  => (is => 'ro', isa => 'Oilert::Redis', lazy_build => 1);
 
 method check {
@@ -96,7 +96,7 @@ method notify {
         status => $msg, 
         lat => $ship->{lat},
         long => $ship->{lng}
-    });
+    }) if $self->twitter;
 
     my @recipients = $self->redis->smembers('notify');
     if (!@recipients) {
@@ -163,6 +163,7 @@ method _build_config {
 }
 
 method _build_twitter {
+    return undef unless $self->config->{twitter_username};
     my $t = Net::Twitter->new(
         traits => ['API::REST', 'OAuth'],
         consumer_key => $self->config->{twitter_consumer_key},

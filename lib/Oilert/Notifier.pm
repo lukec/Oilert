@@ -43,8 +43,8 @@ method check {
                 if (!$ship->{near_wrmt}) {
                     # Ship has just left westridge marine terminal
                     $ship->{full_of_oil}++;
-                    my $next_ebb = next_ebb_tide();
-                    my $ebb_t = join ':', $next_ebb->hour, $next_ebb->minute;
+                    my @tides = map { $_->hour . ':'. $_->minute . ' ' . $_->day_name } next_ebb_tides();
+                    my $ebb_t = join ' or ', @tides;
                     push @to_notify, {
                         reason => "filled up with oil, probably will leave at $ebb_t",
                         ship => $ship,
@@ -109,7 +109,7 @@ method notify {
     }
 }
 
-sub next_ebb_tide {
+sub next_ebb_tides {
     my $now = DateTime->now;
     $now->set_time_zone('America/Vancouver');
 
@@ -118,6 +118,7 @@ sub next_ebb_tide {
         . 'tplotdir=horiz;cleanout=1;glen=3;'
         . 'site=Second%20Narrows%2C%20British%20Columbia%20Current'
     );
+    my @tides;
     for my $line (split "\n", $content) {
         next unless $line =~ m/(\d+)-(\d+)-(\d+)\s+(\d+):(\d+)\s+\w+\s+[\d\-\.]+\s+knots\s+Slack, Ebb Begins$/;
         my $dt = DateTime->new(
@@ -132,8 +133,10 @@ sub next_ebb_tide {
         # Skip high tides that are at night
         next if $dt->hour < 6 or $dt->hour > 22;
 
-        return $dt;
+        push @tides, $dt;
+        return @tides if @tides == 2;
     }
+    return @tides;
 }
 
 method send_sms_to {

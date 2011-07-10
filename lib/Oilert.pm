@@ -44,17 +44,21 @@ post '/blast' => sub {
     my $notifier = Oilert::Notifier->new;
     my $ui_message = '';
     
-    # TODO check password
-
-    if (my $message = params->{"message"}) {
-        $message = substr $message, 0, 140;
-        debug "Sending a BLAST to everyone for '$message'";
-        $notifier->send_sms_to_all($message);
-        $notifier->twitter->update({ status => $message }) if $notifier->twitter;
-        $ui_message = "Sent the blast to everyone.";
+    my $pass = params->{"password"} || 'No-password';
+    if ($pass ne $notifier->config->{blast_password}) {
+        $ui_message = "Invalid password.";
     }
     else {
-        $ui_message = "No message provided.";
+        if (my $message = params->{"message"}) {
+            $message = substr $message, 0, 140;
+            debug "Sending a BLAST to everyone for '$message'";
+            $notifier->send_sms_to_all($message);
+            $notifier->twitter->update({ status => $message }) if $notifier->twitter;
+            $ui_message = "Sent the blast to everyone.";
+        }
+        else {
+            $ui_message = "No message provided.";
+        }
     }
 
     forward '/blast', { ui_message => $ui_message }, { method => 'GET' };

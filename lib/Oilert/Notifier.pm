@@ -109,13 +109,14 @@ method notify {
         long => $ship->{lng}
     }) if $self->twitter;
 
+    $self->send_sms_to_all($msg);
+}
+
+method send_sms_to_all {
+    my $msg = shift;
     my @recipients = $self->redis->smembers('notify');
-    if (!@recipients) {
-        warn "No recipients to notify about $reason!";
-        return;
-    }
     for my $to (@recipients) {
-        debug "Notifying $to about $ship->{name}\n";
+        debug "Notifying $to about $msg\n";
         $self->send_sms_to( $to, $msg);
     }
 }

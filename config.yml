@@ -4,10 +4,8 @@
 
 # Your application's name
 appname: "Oilert"
-
-# The default layout to use for your application (located in
-# views/layouts/main.tt)
 layout: "main"
+auto_page: 1
 
 # when the charset is set to UTF-8 Dancer will handle for you
 # all the magic of encoding and decoding. You should not care

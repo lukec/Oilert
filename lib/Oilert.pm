@@ -28,9 +28,37 @@ sub ships {
     };
 }
 
-get '/docs'  => sub { template 'docs' };
 get '/form'  => sub { template 'form', {}, {layout => undef} };
 get '/ships' => sub { template 'ships', ships(), {layout => undef} };
+
+get '/blast' => sub {
+    my $data = ships();
+    debug "GET blast - " . (params->{message} || '');
+    use Data::Dumper;
+    debug params;
+    template 'blast-form', {
+        message => params->{ui_message},
+    };
+};
+post '/blast' => sub {
+    my $notifier = Oilert::Notifier->new;
+    my $ui_message = '';
+    
+    # TODO check password
+
+    if (my $message = params->{"message"}) {
+        $message = substr $message, 0, 140;
+        debug "Sending a BLAST to everyone for '$message'";
+        $notifier->send_sms_to_all($message);
+        $notifier->twitter->update({ status => $message }) if $notifier->twitter;
+        $ui_message = "Sent the blast to everyone.";
+    }
+    else {
+        $ui_message = "No message provided.";
+    }
+
+    forward '/blast', { ui_message => $ui_message }, { method => 'GET' };
+};
 
 post '/notify' => sub {
     my $redis = Oilert::Redis->new;
@@ -50,7 +78,6 @@ post '/notify' => sub {
             "You are now un-subscribed. Call 604-683-8220 for help."
         );
     }
-    debug $message;
 
     forward '/', { message => $message }, { method => 'GET' };
 };

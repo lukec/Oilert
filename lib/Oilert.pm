@@ -33,9 +33,6 @@ get '/ships' => sub { template 'ships', ships(), {layout => undef} };
 
 get '/blast' => sub {
     my $data = ships();
-    debug "GET blast - " . (params->{message} || '');
-    use Data::Dumper;
-    debug params;
     template 'blast-form', {
         message => params->{ui_message},
     };

@@ -29,7 +29,19 @@ sub ships {
 }
 
 get '/sms'   => sub {
-    debug "Received SMS message";
+    my $from = params->{from};
+    my $msg  = params->{msg};
+    if ($msg and $from) {
+        if ($msg eq 'stop') {
+            debug "Stopping sending to $from";
+        }
+        else {
+            debug "Unknown command";
+        }
+    }
+    else {
+        debug "Invalid SMS request";
+    }
     template 'sms-rx', {}, {layout => undef};
 };
 

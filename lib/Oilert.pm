@@ -28,6 +28,10 @@ sub ships {
     };
 }
 
+get '/sms'   => sub {
+    template 'sms-rx', {}, {layout => undef};
+};
+
 get '/form'  => sub { template 'form', {}, {layout => undef} };
 get '/ships' => sub { template 'ships', ships(), {layout => undef} };
 

@@ -29,6 +29,7 @@ sub ships {
 }
 
 get '/sms'   => sub {
+    debug "Received SMS message";
     template 'sms-rx', {}, {layout => undef};
 };
 

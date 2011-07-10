@@ -30,7 +30,7 @@ sub ships {
 
 get '/sms'   => sub {
     my $from = params->{from};
-    my $msg  = params->{msg};
+    my $msg  = lc params->{msg};
     if ($msg and $from) {
         if ($msg eq 'stop') {
             debug "Stopping sending to $from";

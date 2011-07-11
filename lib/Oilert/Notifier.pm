@@ -16,6 +16,22 @@ has 'config' => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 has 'twitter' => (is => 'ro', isa => 'Maybe[Net::Twitter]', lazy_build => 1);
 has 'redis'  => (is => 'ro', isa => 'Oilert::Redis', lazy_build => 1);
 
+method add_subscriber {
+    my $num = shift;
+    $self->send_sms_to( $num,
+        "You are now subscribed to Burrard Inlet Oil Tanker Traffic notifications. Call 604-683-8220 for help."
+    );
+    $self->redis->sadd('notify', $num);
+};
+
+method remove_subscriber {
+    my $num = shift;
+    $self->redis->srem('notify', $num);
+    $self->send_sms_to( $num,
+        "You are now un-subscribed. Call 604-683-8220 for help."
+    );
+}
+
 method check {
     my $data = shift;
 

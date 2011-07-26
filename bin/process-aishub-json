@@ -1,0 +1,100 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use strict;
+use warnings;
+use JSON qw/decode_json/;
+use Math::Polygon;
+use LWP::UserAgent;
+use IO::All;
+
+$| = 1;
+
+my $East_of_second_narrows = Math::Polygon->new(
+    [49.302181,-123.002930],
+    [49.310909,-122.984734],
+    [49.318298,-122.938385],
+    [49.294456,-122.835388],
+    [49.279118,-122.857536],
+    [49.290314,-122.997093],
+    [49.302181,-123.002930],
+);
+
+my $Near_WRMT = Math::Polygon->new(
+    [49.287514,-122.967735],
+    [49.287041,-122.961304],
+    [49.292610,-122.945763],
+    [49.294315,-122.947739],
+    [49.292023,-122.959068],
+    [49.291630,-122.966881],
+    [49.287514,-122.967735],
+);
+
+my $ua = LWP::UserAgent->new(agent =>
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.112 Safari/534.30"
+);
+
+my $count = 0;
+while (my $line = <>) {
+    my $msg = eval { decode_json($line) };
+    next if $@;
+    next unless $msg->{msgtype} =~ m/^[123]$/;
+
+    $msg->{lat} /= 600000.0;
+    $msg->{lng} = delete($msg->{lon}) / 600000.0;
+    unless ($East_of_second_narrows->contains([$msg->{lat}, $msg->{lng}])) {
+        print '.' unless $count++ % 20;
+        next;
+    }
+
+    $msg->{details_url} = 'http://marinetraffic.com/ais/shipdetails.aspx?mmsi='
+                        . $msg->{mmsi};
+
+    delete $msg->{$_}
+        for qw/course second heading status turn raim repeat maneuver accuracy/;
+    scrape_ship($msg);
+
+    print "\n$msg->{ship_name} ($msg->{ship_type}) - $msg->{details_url}\n";
+}
+
+exit;
+
+my %ships;
+sub scrape_ship {
+    my $msg = shift;
+
+    my $ship = $ships{$msg->{mmsi}};
+    unless ($ship) {
+        my $resp = $ua->get($msg->{details_url});
+        return unless $resp->code == 200;
+        my $content = $resp->content;
+        if ($content =~ m(<b>Ship Type:</b>\s*(\w+)<br/>)) {
+            $ship->{type} = $1;
+        }
+        if ($content =~ m/title='([^']+)'/) {
+            $ship->{name} = $1;
+        }
+        $ships{$msg->{mmsi}} = $ship;
+    }
+    $msg->{ship_type} = $ship->{type} || 'Unknown';
+    $msg->{ship_name} = $ship->{name} || 'Unknown';
+}
+
+__DATA__
+
+$VAR1 = {
+    'course'   => 2761,
+    'second'   => 29,
+    'lat'      => 34180972,
+    'status'   => 3,
+    'heading'  => 511,
+    'radio'    => 114743,
+    'msgtype'  => 1,
+    'turn'     => -128,
+    'raim'     => 1,
+    'mmsi'     => 2750350,
+    'speed'    => 0,
+    'repeat'   => 0,
+    'lon'      => 14457105,
+    'maneuver' => 0,
+    'accuracy' => 0
+};

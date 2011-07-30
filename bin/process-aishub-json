@@ -41,13 +41,15 @@ while (my $line = <>) {
 
     $msg->{lat} /= 600000.0;
     $msg->{lng} = delete($msg->{lon}) / 600000.0;
-    unless ($East_of_second_narrows->contains([$msg->{lat}, $msg->{lng}])) {
+    my $latlng = [$msg->{lat}, $msg->{lng}];
+    unless ($East_of_second_narrows->contains($latlng)) {
         print '.' unless $count++ % 20;
         next;
     }
 
     $msg->{details_url} = 'http://marinetraffic.com/ais/shipdetails.aspx?mmsi='
                         . $msg->{mmsi};
+    $msg->{near_wrmt} = $Near_WRMT->contains($latlng) ? 1 : 0;
 
     delete $msg->{$_}
         for qw/course second heading status turn raim repeat maneuver accuracy/;

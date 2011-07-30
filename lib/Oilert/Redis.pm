@@ -19,7 +19,7 @@ method set_json {
 method get_json {
     my $key = shift;
     my $val = $self->redis->get($key);
-    return decode_json($val);
+    return $val ? decode_json($val) : undef;
 }
     
 

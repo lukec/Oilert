@@ -61,7 +61,8 @@ method check {
                 if (!$ship->{near_wrmt}) {
                     # Ship has just left westridge marine terminal
                     $ship->{full_of_oil}++;
-                    my @tides = map { $_->hour . ':'. $_->minute . ' ' . $_->day_name } next_ebb_tides();
+                    my @tides = map { $_->hour . ':'. $_->minute . ' ' . $_->day_name }
+                                next_ebb_tides();
                     my $ebb_t = join ' or ', @tides;
                     push @to_notify, {
                         reason => "filled up with oil, probably will leave at $ebb_t",

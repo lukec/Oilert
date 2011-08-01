@@ -1,0 +1,54 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use JSON qw/decode_json/;
+use LWP::UserAgent;
+use Dancer ':syntax';
+use Cwd qw/realpath/;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use Oilert::ShipDatabase;
+use AnyEvent;
+use AnyEvent::Socket;
+
+Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
+config->{environment} = 'production' if -d '/home/dotcloud';
+Dancer::Config::load();
+
+my $cv = AnyEvent->condvar;
+my $w = AnyEvent->signal(signal => "INT", cb => sub { $cv->send });
+my $shipdb = Oilert::ShipDatabase->new;
+
+use Inline Python => <<'END';
+import ais
+def decode_ais(line):
+    return ais.decode(line)
+END
+
+my $aishub_watcher;
+my $socket_guard = tcp_connect 'data.aishub.net' => 4275, sub {
+    my $fh = shift or die "Couldn't connect to aishub: $!";
+    warn "Connected to aishub.\n";
+    $aishub_watcher = AnyEvent->io(
+        fh => $fh,
+        poll => 'r',
+        cb => sub {
+            while (my $line = <$fh>) {
+                # warn "AISHUB: $line";
+                my @d = split ',', $line;
+                return unless $d[1] == 1 and $d[2] == 1;
+                my $msg = eval { decode_ais($d[5]) };
+                return unless $msg;
+                return unless $msg->{id} =~ m/^[123]$/;
+
+                my $mmsi = $msg->{mmsi};
+                my $new_ship = $shipdb->get_ship($mmsi);
+                $new_ship->lat($msg->{y});
+                $new_ship->lon($msg->{x});
+                $new_ship->speed($msg->{nav_status} == 1 ? 0 : $msg->{sog});
+                $shipdb->save($new_ship);
+            }
+        },
+    );
+};
+
+$cv->recv;

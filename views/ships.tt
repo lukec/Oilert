@@ -6,14 +6,15 @@
           [% ELSE %]
             <ul>
             [% FOREACH ship IN ships %]
-              <li><a href="[% ship.detail_url %]">[% ship.name %]</a> - [% ship.type %]
+              <li><a href="http://marinetraffic.com/ais/shipdetails.aspx?mmsi=[% ship.mmsi %]">[% ship.name %]</a> - [% ship.type %]
                   - 
                   [% IF ship.speed > 0.5 %]
                     Moving at [% ship.speed %] knots
                   [% ELSE %]
                     Stopped
                   [% END %]
-                  - (<a href="[% ship.map_url %]">map</a>) - (<a href="http://www.portarrivals.com/vsl.asp?item=[% ship.mmsi %]">Ports</a>, <a href="http://aprs.fi/info/[% ship.mmsi %]">Details</a>, <a href="[% ship.google_url %]">Google</a>)
+                  - (<a
+                    href="http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=[% ship.mmsi %]&centerx=[% ship.lon %]&centery=[% ship.lat %]">map</a>) - (<a href="http://www.portarrivals.com/vsl.asp?item=[% ship.mmsi %]">Ports</a>, <a href="http://aprs.fi/info/[% ship.mmsi %]">Details</a>, <a href="http://www.google.ca/#q=[% ship.name %]+[% ship.mmsi %]">Google</a>)
               </li>
             [% END %]
             </ul>

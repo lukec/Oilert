@@ -1,8 +1,7 @@
 package Oilert;
 use Dancer ':syntax';
-use YAML qw/LoadFile/;
-use Oilert::Redis;
 use Oilert::Notifier;
+use Oilert::ShipDatabase;
 use Number::Phone;
 use DateTime;
 
@@ -18,13 +17,10 @@ get '/' => sub {
 };
 
 sub ships {
-    my $data = LoadFile("data/ships.yaml");
-    my $time = DateTime->from_epoch(epoch => $data->{update_time});
-    $time->set_time_zone("America/Vancouver");
-
+    my $db = Oilert::ShipDatabase->new;
     return {
-        ships => $data->{Tanker} || [],
-        update_time => $time,
+        ships => $db->ships,
+        update_time => $db->last_update,
     };
 }
 

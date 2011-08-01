@@ -34,98 +34,87 @@ method remove_subscriber {
     );
 }
 
-method check {
-    my $data = shift;
+method update {
+    my $old_ship = shift;
+    my $new_ship = shift;
 
-    my @to_notify;
-    my %seen;
-    for my $type (keys %$data) {
-        next unless ref($data->{$type});
-        for my $ship (@{ $data->{$type} }) {
-            my $mmsi = $ship->{mmsi};
-            $seen{ $mmsi } ||= $ship;
-            debug "Checking $ship->{name} ... $ship->{detail_url}";
+    my $mmsi = $new_ship->mmsi;
+    my $name = $new_ship->name;
+    warn "Checking $name ...";
 
+    if ($self->redis->sismember("ships_in_bi", $mmsi)) {
+        # Notice ships leaving the second narrows
+        if (not $new_ship->is_in_binlet) {
+            my $reason = '';
+            $reason = " full of oil" if $new_ship->has_filled_up;
+
+            $self->redis->srem('ships_in_bi', $mmsi);
+
+            return {
+                reason => "left the Burrard Inlet$reason",
+                ship => $new_ship,
+            };
+        }
+    }
+    else {
+        if ($new_ship->is_in_binlet) {
             # Notice ships coming into the second narrows
-            if (not $self->redis->sismember("ships_in_bi", $mmsi)) {
-                # Just came into BI - notify
-                push @to_notify, {
-                    reason => "entered the Burrard Inlet",
-                    ship   => $ship,
-                };
-                $self->redis->sadd("ships_in_bi", $mmsi);
-            }
-
-            # Check for ships filling up at Westridge Marine Terminal
-            if ($self->redis->sismember("ships_at_WRMT", $mmsi)) {
-                if (!$ship->{near_wrmt}) {
-                    # Ship has just left westridge marine terminal
-                    $ship->{full_of_oil}++;
-                    my @tides = map { $_->hour . ':'. $_->minute . ' ' . $_->day_name }
-                                next_ebb_tides();
-                    my $ebb_t = join ' or ', @tides;
-                    push @to_notify, {
-                        reason => "filled up with oil, probably will leave at $ebb_t",
-                        ship => $ship,
-                    };
-                    $self->redis->srem("ships_at_WRMT", $mmsi);
-                }
-            }
-            else {
-                if ($ship->{near_wrmt}) {
-                    # Ship just arrived at WRMT
-                    push @to_notify, {
-                        reason => "docked at Westridge",
-                        ship => $ship,
-                    };
-                    $self->redis->sadd("ships_at_WRMT", $mmsi);
-                }
-            }
-
-            # Remember if the ship filled up already.
-            if (my $oldship = $self->redis->get_json($mmsi)) {
-                $ship->{full_of_oil} ||= $oldship->{full_of_oil};
-            }
-
-            # Regardless, update the ship's state
-            $self->redis->set_json($mmsi, $ship);
+            # Just came into BI - notify
+            $self->redis->sadd("ships_in_bi", $mmsi);
+            $new_ship->has_filled_up(0);
+            return {
+                reason => "entered the Burrard Inlet",
+                ship   => $new_ship,
+            };
         }
     }
 
-    my @all_known = $self->redis->smembers("ships_in_bi");
-    for my $mmsi (@all_known) {
-        next if $seen{$mmsi};
-        my $ship = $self->redis->get_json($mmsi);
-        my $reason = '';
-        $reason = " full of oil" if $ship->{full_of_oil};
+    # Check for ships filling up at Westridge Marine Terminal
+    if ($self->redis->sismember("ships_at_WRMT", $mmsi)) {
+        if (not $new_ship->is_near_wrmt) {
+            # Ship has just left westridge marine terminal
+            $new_ship->has_filled_up(1);
+            $self->redis->set_json($mmsi, $new_ship);
 
-        # This ship wasn't seen, so it has left the BI
-        push @to_notify, {
-            reason => "left the Burrard Inlet$reason",
-            ship => $self->redis->get_json($mmsi),
-        };
-        $self->redis->srem('ships_in_bi', $mmsi);
-
-        # For now, do not remember ships that have left the area.
-        $self->redis->del($mmsi);
+            my @tides = map { $_->hour . ':'. $_->minute . ' ' . $_->day_name }
+                        next_ebb_tides();
+            my $ebb_t = join ' or ', @tides;
+            $self->redis->srem("ships_at_WRMT", $mmsi);
+            return {
+                reason => "filled up with oil, probably will leave at $ebb_t",
+                ship => $new_ship,
+            };
+        }
+    }
+    else {
+        if ($new_ship->is_near_wrmt) {
+            # Ship just arrived at WRMT
+            $self->redis->sadd("ships_at_WRMT", $mmsi);
+            return {
+                reason => "docked at Westridge",
+                ship => $new_ship,
+            };
+        }
     }
 
-    return \@to_notify;
+    return undef;
 }
 
 method notify {
     my $notif = shift;
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
-    my $link = makeashorterlink($ship->{detail_url});
-    my $msg = "Ship '$ship->{name}' $reason - $link - Take Action: 604-683-8220";
+    use Data::Dumper;
+    warn Dumper $ship;
+    my $link = makeashorterlink($ship->detail_url);
+    my $msg = "Ship '" . $ship->{name} . "' $reason - $link - Take Action: 604-683-8220";
 
     debug "Notification: '$msg' (length: " . length($msg). ")";
 
     $self->twitter->update({
         status => $msg, 
-        lat => $ship->{lat},
-        long => $ship->{lng}
+        lat => $ship->lat,
+        long => $ship->lng
     }) if $self->twitter;
 
     $self->send_sms_to_all($msg);

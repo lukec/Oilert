@@ -16,3 +16,11 @@ The web application is hosted on the dotCloud platform.  It is written in Perl u
 The web app uses a Redis database to store information about the ships.
 
 
+** Feed Consumer **
+
+The data feed is supplied by aishub.net as a TCP stream of raw AIS data.  The best reference for this is Eric S. Raymond's Protocol Decoding Guide - http://gpsd.berlios.de/AIVDM.html 
+
+We use a ./bin/ais.py script from Kurt Schwehr - https://github.com/schwehr
+* It has been modified slightly to ignore types of errors
+
+ais.py emits a json stream which we consume and stick into Redis.

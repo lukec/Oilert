@@ -10,12 +10,14 @@ use LWP::UserAgent;
 has 'db' => (is => 'rw', isa => 'Oilert::Redis', lazy_build => 1);
 has 'notifier' => (is => 'ro', isa => 'Oilert::Notifier', lazy_build => 1);
 
+method ignore { $self->db->sadd('mmsi_ignore', shift) }
+method should_ignore { $self->db->sismember('mmsi_ignore', shift) }
+
 method get_ship {
     my $mmsi = shift;
     my $ship = $self->db->get_json($mmsi);
-    delete $ship->{name} unless $ship->{name};
-    delete $ship->{type} unless $ship->{type};
-    return Oilert::Ship->new($ship) if $ship and %$ship;
+    return Oilert::Ship->new($ship) if $ship;
+    debug "!!!! Couldn't fetch ship - going to create a new one for $mmsi";
     $ship = Oilert::Ship->new(mmsi => $mmsi);
     $ship->scrape;
     return $ship;
@@ -36,8 +38,16 @@ method save {
 }
 
 method ships {
-    [ map { Oilert::Ship->new($self->db->get_json($_)) }
-          $self->db->smembers('ships_in_bi') ];
+    my @ships;
+    for my $mmsi ($self->db->smembers('ships_in_bi')) {
+        my $obj = $self->db->get_json($mmsi);
+        unless ($obj) {
+            $self->db->srem('ships_in_bi', $mmsi);
+            next;
+        }
+        push @ships, Oilert::Ship->new($obj);
+    }
+    return \@ships;
 }
 
 method last_update { $self->db->get('last_update') || 'Never' }

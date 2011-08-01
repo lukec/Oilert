@@ -1,9 +1,11 @@
 package Oilert::Redis;
 use 5.12.0;
+use Dancer ':syntax';
 use methods;
 use Moose;
 use Redis;
 use JSON qw/encode_json decode_json/;
+use Try::Tiny;
 
 has 'redis' => (is => 'ro', isa => 'Redis', lazy_build => 1, 
                 handles => [qw/get set del sismember rpush type sadd srem smembers keys/]);
@@ -18,10 +20,8 @@ method set_json {
 
 method get_json {
     my $key = shift;
-    if (my $val = $self->redis->get($key)) {
-        return eval { decode_json($val) };
-    }
-    return undef;
+    my $json = $self->redis->get($key);
+    return decode_json($json);
 }
     
 

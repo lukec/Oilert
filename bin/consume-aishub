@@ -14,6 +14,8 @@ Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
 config->{environment} = 'production' if -d '/home/dotcloud';
 Dancer::Config::load();
 
+$| = 1;
+
 my $cv = AnyEvent->condvar;
 my $w = AnyEvent->signal(signal => "INT", cb => sub { $cv->send });
 my $shipdb = Oilert::ShipDatabase->new;
@@ -41,7 +43,16 @@ my $socket_guard = tcp_connect 'data.aishub.net' => 4275, sub {
                 return unless $msg->{id} =~ m/^[123]$/;
 
                 my $mmsi = $msg->{mmsi};
+                if ($shipdb->should_ignore($mmsi)) {
+                    print ".";
+                    next;
+                }
                 my $new_ship = $shipdb->get_ship($mmsi);
+                if ($new_ship->type ne 'Tanker') {
+                    $shipdb->ignore($mmsi);
+                    debug "Ignoring $mmsi - not a tanker";
+                    next;
+                }
                 $new_ship->lat($msg->{y});
                 $new_ship->lon($msg->{x});
                 $new_ship->speed($msg->{nav_status} == 1 ? 0 : $msg->{sog});

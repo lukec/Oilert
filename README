@@ -1,0 +1,18 @@
+Oilert is an app to track the movement of tanker ships in Burrard Inlet.
+
+It consists of the following components:
+
+* A web interface to show the current state of ships nearby.
+* An API to subscribe and unsubscribe from SMS notifications.
+* A script to consume the AIShub.net feed and update our state.
+
+These are briefly explained below.
+
+
+** Web Interface **
+
+The web application is hosted on the dotCloud platform.  It is written in Perl using the Dancer framework.
+
+The web app uses a Redis database to store information about the ships.
+
+

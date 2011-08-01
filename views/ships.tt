@@ -6,7 +6,7 @@
           [% ELSE %]
             <ul>
             [% FOREACH ship IN ships %]
-              <li><a href="http://marinetraffic.com/ais/shipdetails.aspx?mmsi=[% ship.mmsi %]">[% ship.name %]</a> - [% ship.type %]
+              <li><a href="[% ship.detail_url %]">[% ship.name %]</a> - [% ship.type %]
                   - 
                   [% IF ship.speed > 0.5 %]
                     Moving at [% ship.speed %] knots

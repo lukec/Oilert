@@ -24,13 +24,15 @@ method get_ship {
 method save {
     my $ship = shift;
     my $mmsi = $ship->mmsi;
-    my $old_ship = $self->db->get_json($mmsi);
-    $self->notifier->update($old_ship, $ship) if $ship->is_a_tanker;
-    $self->db->set_json($mmsi, $ship->to_hash);
-    my $now = DateTime->now;
-    $now->set_time_zone('America/Vancouver');
-    $self->db->set(last_update => $now->ymd . ' ' . $now->hms);
-    warn "Saved ship $mmsi " . $ship->name . " to Redis\n";
+    eval {
+        my $old_ship = $self->db->get_json($mmsi);
+        $self->notifier->update($old_ship, $ship) if $ship->is_a_tanker;
+        $self->db->set_json($mmsi, $ship->to_hash);
+        my $now = DateTime->now;
+        $now->set_time_zone('America/Vancouver');
+        $self->db->set(last_update => $now->ymd . ' ' . $now->hms);
+        warn "Saved " . $ship->type . " $mmsi " . $ship->name . "\n";
+    };
 }
 
 method ships {
@@ -57,10 +59,12 @@ has 'type' => (is => 'rw', isa => 'Str');
 has 'speed' => (is => 'rw', isa => 'Num', default => 0);
 has 'has_filled_up' => (is => 'rw', isa => 'Bool', default => 0);
 
-has 'details_uri'                     => (is => 'ro', lazy_build => 1);
-has 'map_uri'                         => (is => 'ro', lazy_build => 1);
 has 'polygon_east_of_second_narrows'  => (is => 'ro', lazy_build => 1);
 has 'polygon_near_westridge_terminal' => (is => 'ro', lazy_build => 1);
+
+method detail_url {
+    "http://marinetraffic.com/ais/shipdetails.aspx?mmsi=".$self->mmsi;
+}
 
 method is_a_tanker {
     $self->scrape unless $self->type;
@@ -88,13 +92,17 @@ method scrape {
     my $ua = LWP::UserAgent->new(agent =>
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.30 "
         . "(KHTML, like Gecko) Chrome/12.0.742.112 Safari/534.30");
-    my $resp = $ua->get($self->details_uri);
+    my $uri = $self->detail_url;
+    my $resp = $ua->get($uri);
     if ($resp->code == 200) {
         my $content = $resp->content;
         $content =~ m(<b>Ship Type:</b>\s*(\w+)<br/>);
         $self->type($1 || 'Unknown');
         $content =~ m/title='([^']+)'/;
         $self->name($1 || 'No-Name');
+    }
+    else {
+        warn "Failed to scrape " . $self->detail_url;
     }
 }
 
@@ -120,9 +128,4 @@ method _build_polygon_near_westridge_terminal {
         [49.291630,-122.966881],
         [49.287514,-122.967735],
     );
-}
-
-method _build_map_uri {
-    'http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi='
-    . $self->mmsi . '&centerx=' . $self->lon . '&centery=' . $self->lat;
 }

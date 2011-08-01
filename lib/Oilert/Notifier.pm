@@ -35,9 +35,13 @@ method remove_subscriber {
 }
 
 method update {
-    my $old_ship = shift;
-    my $new_ship = shift;
+    if (my $alert = $self->_check(@_)) {
+        $self->notify($alert);
+    }
+}
 
+method _check {
+    my ($old_ship, $new_ship) = @_;
     my $mmsi = $new_ship->mmsi;
     my $name = $new_ship->name;
     warn "Checking $name ...";
@@ -104,8 +108,6 @@ method notify {
     my $notif = shift;
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
-    use Data::Dumper;
-    warn Dumper $ship;
     my $link = makeashorterlink($ship->detail_url);
     my $msg = "Ship '" . $ship->{name} . "' $reason - $link - Take Action: 604-683-8220";
 

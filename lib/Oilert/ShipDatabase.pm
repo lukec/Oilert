@@ -91,7 +91,8 @@ method is_a_tanker {
 
 method to_hash {
     return {
-        map { $_ => $self->$_ } qw/mmsi lat lon name has_filled_up type speed/
+        map { $_ => $self->$_ } 
+        qw/mmsi lat lon name has_filled_up type speed last_update/
     }
 }
 

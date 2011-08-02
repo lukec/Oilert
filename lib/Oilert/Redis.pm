@@ -21,7 +21,10 @@ method set_json {
 method get_json {
     my $key = shift;
     my $json = $self->redis->get($key);
-    return decode_json($json);
+    return undef unless $json;
+    my $obj = eval {  decode_json($json) };
+    return $obj unless $@;
+    die "Failed to decode JSON for $key: $json";
 }
     
 

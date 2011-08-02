@@ -9,6 +9,7 @@ use lib "$FindBin::Bin/../lib";
 use Oilert::ShipDatabase;
 use AnyEvent;
 use AnyEvent::Socket;
+use Try::Tiny;
 
 Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
 config->{environment} = 'production' if -d '/home/dotcloud';
@@ -34,30 +35,35 @@ my $socket_guard = tcp_connect 'data.aishub.net' => 4275, sub {
         fh => $fh,
         poll => 'r',
         cb => sub {
-            while (my $line = <$fh>) {
-                # warn "AISHUB: $line";
-                my @d = split ',', $line;
-                return unless $d[1] == 1 and $d[2] == 1;
-                my $msg = eval { decode_ais($d[5]) };
-                return unless $msg;
-                return unless $msg->{id} =~ m/^[123]$/;
+            try {
+                while (my $line = <$fh>) {
+                    # warn "AISHUB: $line";
+                    my @d = split ',', $line;
+                    return unless $d[1] == 1 and $d[2] == 1;
+                    my $msg = eval { decode_ais($d[5]) };
+                    return unless $msg;
+                    return unless $msg->{id} =~ m/^[123]$/;
 
-                my $mmsi = $msg->{mmsi};
-                if ($shipdb->should_ignore($mmsi)) {
-                    print ".";
-                    next;
+                    my $mmsi = $msg->{mmsi};
+                    if ($shipdb->should_ignore($mmsi)) {
+                        print ".";
+                        next;
+                    }
+                    my $new_ship = $shipdb->get_ship($mmsi);
+                    if ($new_ship->type ne 'Tanker') {
+                        $shipdb->ignore($mmsi);
+                        debug "Ignoring $mmsi - not a tanker";
+                        next;
+                    }
+                    $new_ship->lat($msg->{y});
+                    $new_ship->lon($msg->{x});
+                    $new_ship->speed($msg->{nav_status} == 1 ? 0 : $msg->{sog});
+                    $shipdb->save($new_ship);
                 }
-                my $new_ship = $shipdb->get_ship($mmsi);
-                if ($new_ship->type ne 'Tanker') {
-                    $shipdb->ignore($mmsi);
-                    debug "Ignoring $mmsi - not a tanker";
-                    next;
-                }
-                $new_ship->lat($msg->{y});
-                $new_ship->lon($msg->{x});
-                $new_ship->speed($msg->{nav_status} == 1 ? 0 : $msg->{sog});
-                $shipdb->save($new_ship);
             }
+            catch {
+                debug "Failed: $_";
+            };
         },
     );
 };

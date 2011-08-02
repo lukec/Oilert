@@ -17,7 +17,6 @@ method get_ship {
     my $mmsi = shift;
     my $ship = $self->db->get_json($mmsi);
     return Oilert::Ship->new($ship) if $ship;
-    debug "!!!! Couldn't fetch ship - going to create a new one for $mmsi";
     $ship = Oilert::Ship->new(mmsi => $mmsi);
     $ship->scrape;
     return $ship;
@@ -107,7 +106,7 @@ method is_near_wrmt {
 }
 
 method scrape {
-    debug "======   Fetching name of " . $self->mmsi . ' ===========';
+    print "FETCH:" . $self->mmsi;
     my $ua = LWP::UserAgent->new(agent =>
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.30 "
         . "(KHTML, like Gecko) Chrome/12.0.742.112 Safari/534.30");

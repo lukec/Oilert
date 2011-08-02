@@ -44,7 +44,6 @@ method _check {
     my ($old_ship, $new_ship) = @_;
     my $mmsi = $new_ship->mmsi;
     my $name = $new_ship->name;
-    warn "Checking $name ...";
 
     if ($self->redis->sismember("ships_in_bi", $mmsi)) {
         # Notice ships leaving the second narrows

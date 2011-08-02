@@ -18,7 +18,10 @@ Dancer::Config::load();
 $| = 1;
 
 my $cv = AnyEvent->condvar;
-my $w = AnyEvent->signal(signal => "INT", cb => sub { $cv->send });
+my $w = AnyEvent->signal(signal => "INT", cb => sub {
+        print "Sig INT received. Exiting.\n";
+        $cv->send;
+    });
 my $shipdb = Oilert::ShipDatabase->new;
 
 use Inline Python => <<'END';
@@ -39,7 +42,7 @@ my $socket_guard = tcp_connect 'data.aishub.net' => 4275, sub {
                 while (my $line = <$fh>) {
                     # warn "AISHUB: $line";
                     my @d = split ',', $line;
-                    return unless $d[1] == 1 and $d[2] == 1;
+                    return unless @d > 1 and $d[1] == 1 and $d[2] == 1;
                     my $msg = eval { decode_ais($d[5]) };
                     return unless $msg;
                     return unless $msg->{id} =~ m/^[123]$/;
@@ -52,9 +55,10 @@ my $socket_guard = tcp_connect 'data.aishub.net' => 4275, sub {
                     my $new_ship = $shipdb->get_ship($mmsi);
                     if ($new_ship->type ne 'Tanker') {
                         $shipdb->ignore($mmsi);
-                        debug "Ignoring $mmsi - not a tanker";
+                        print "IGNORE:$mmsi";
                         next;
                     }
+                    print $new_ship->name;
                     $new_ship->lat($msg->{y});
                     $new_ship->lon($msg->{x});
                     $new_ship->speed($msg->{nav_status} == 1 ? 0 : $msg->{sog});

@@ -11,10 +11,11 @@ These are briefly explained below.
 
 ** Web Interface **
 
-The web application is hosted on the dotCloud platform.  It is written in Perl using the Dancer framework.
+The web application is written in Perl using the Dancer framework.  The initial prototype was hosted on dotCloud.
+
+The app is now hosted by Luke Closs <oil@5thplane.com>.
 
 The web app uses a Redis database to store information about the ships.
-
 
 ** Feed Consumer **
 
@@ -24,3 +25,17 @@ We use a ./bin/ais.py script from Kurt Schwehr - https://github.com/schwehr
 * It has been modified slightly to ignore types of errors
 
 ais.py emits a json stream which we consume and stick into Redis.
+
+
+=== INSTALLING ===
+
+Install dependencies first:
+* libais https://github.com/schwehr/libais/
+* Many Perl dependencies listed in Makefile.PL
+* Redis
+
+Then you should be able to run the consumer ./bin/consume-aishub
+And you should be able to run the web interface in development mode: plackup
+
+
+With this in place, you can install these services into your environment.

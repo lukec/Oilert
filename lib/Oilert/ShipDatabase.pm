@@ -61,6 +61,7 @@ use Dancer qw/:syntax/;
 use Moose;
 use methods;
 use Math::Polygon;
+use DateTime;
 
 has 'mmsi' => (is => 'rw', isa => 'Str', required => 1);
 has 'lat' => (is => 'rw', isa => 'Num');
@@ -76,6 +77,11 @@ has 'polygon_near_westridge_terminal' => (is => 'ro', lazy_build => 1);
 
 method detail_url {
     "http://marinetraffic.com/ais/shipdetails.aspx?mmsi=".$self->mmsi;
+}
+
+method as_string {
+    my $dt = DateTime->from_epoch(epoch => $self->last_update);
+    return $self->name . ' (' . $self->mmsi . ') last-update=' . $dt;
 }
 
 method is_a_tanker {

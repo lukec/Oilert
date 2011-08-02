@@ -29,6 +29,7 @@ method save {
     eval {
         my $old_ship = $self->db->get_json($mmsi);
         $self->notifier->update($old_ship, $ship) if $ship->is_a_tanker;
+        $ship->last_update(time);
         $self->db->set_json($mmsi, $ship->to_hash);
         my $now = DateTime->now;
         $now->set_time_zone('America/Vancouver');
@@ -68,6 +69,7 @@ has 'name' => (is => 'rw', isa => 'Str');
 has 'type' => (is => 'rw', isa => 'Str');
 has 'speed' => (is => 'rw', isa => 'Num', default => 0);
 has 'has_filled_up' => (is => 'rw', isa => 'Bool', default => 0);
+has 'last_update' => (is => 'rw', isa => 'Num', default => sub { time });
 
 has 'polygon_east_of_second_narrows'  => (is => 'ro', lazy_build => 1);
 has 'polygon_near_westridge_terminal' => (is => 'ro', lazy_build => 1);

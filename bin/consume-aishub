@@ -68,7 +68,7 @@ sub connect_to_aishub {
                             next;
                         }
                         my $new_ship = $shipdb->get_ship($mmsi);
-                        if ($new_ship->type ne 'Tanker') {
+                        if ($new_ship->type =~ m/^tanker/i) {
                             $shipdb->ignore($mmsi);
                             print "IGNORE:$mmsi";
                             next;

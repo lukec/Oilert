@@ -31,45 +31,64 @@ def decode_ais(line):
 END
 
 my $aishub_watcher;
-my $socket_guard = tcp_connect 'data.aishub.net' => 4275, sub {
-    my $fh = shift or die "Couldn't connect to aishub: $!";
-    warn "Connected to aishub.\n";
-    $aishub_watcher = AnyEvent->io(
-        fh => $fh,
-        poll => 'r',
-        cb => sub {
-            try {
-                while (my $line = <$fh>) {
-                    # warn "AISHUB: $line";
-                    my @d = split ',', $line;
-                    return unless @d > 1 and $d[1] == 1 and $d[2] == 1;
-                    my $msg = eval { decode_ais($d[5]) };
-                    return unless $msg;
-                    return unless $msg->{id} =~ m/^[123]$/;
+my $socket_guard;
+my $last_rx_time;
+my $aishub_fh;
+sub connect_to_aishub {
+    warn "Checking connection to data.aishub.net\n";
+    if ($socket_guard) {
+        my $duration = time() - $last_rx_time;
+        if ($duration > 20*60) {
+            warn "Haven't received data in $duration seconds, disconnecting.";
+            $socket_guard = undef;
+            $aishub_watcher = undef;
+            close $aishub_fh;
+        }
+    }
+    $socket_guard ||= tcp_connect 'data.aishub.net' => 4275, sub {
+        my $aishub_fh = shift or die "Could not connect to aishub: $!";
+        warn "Connected to aishub.\n";
+        $aishub_watcher = AnyEvent->io(
+            fh => $aishub_fh,
+            poll => 'r',
+            cb => sub {
+                try {
+                    while (my $line = <$aishub_fh>) {
+                        $last_rx_time = time();
+                        # warn "AISHUB: $line";
+                        my @d = split ',', $line;
+                        return unless @d > 1 and $d[1] == 1 and $d[2] == 1;
+                        my $msg = eval { decode_ais($d[5]) };
+                        return unless $msg;
+                        return unless $msg->{id} =~ m/^[123]$/;
 
-                    my $mmsi = $msg->{mmsi};
-                    if ($shipdb->should_ignore($mmsi)) {
-                        print ".";
-                        next;
+                        my $mmsi = $msg->{mmsi};
+                        if ($shipdb->should_ignore($mmsi)) {
+                            print ".";
+                            next;
+                        }
+                        my $new_ship = $shipdb->get_ship($mmsi);
+                        if ($new_ship->type ne 'Tanker') {
+                            $shipdb->ignore($mmsi);
+                            print "IGNORE:$mmsi";
+                            next;
+                        }
+                        $new_ship->lat($msg->{y});
+                        $new_ship->lon($msg->{x});
+                        $new_ship->speed($msg->{nav_status} == 1 ? 0 : $msg->{sog});
+                        $shipdb->save($new_ship);
                     }
-                    my $new_ship = $shipdb->get_ship($mmsi);
-                    if ($new_ship->type ne 'Tanker') {
-                        $shipdb->ignore($mmsi);
-                        print "IGNORE:$mmsi";
-                        next;
-                    }
-                    print $new_ship->name;
-                    $new_ship->lat($msg->{y});
-                    $new_ship->lon($msg->{x});
-                    $new_ship->speed($msg->{nav_status} == 1 ? 0 : $msg->{sog});
-                    $shipdb->save($new_ship);
                 }
-            }
-            catch {
-                debug "Failed: $_";
-            };
-        },
-    );
-};
+                catch {
+                    die "Failed: $_";
+                };
+            },
+        );
+    };
+}
+my $reconnect_timer = AnyEvent->timer(
+    after => 0.01, interval => 900.0,
+    cb => \&connect_to_aishub,
+);
 
 $cv->recv;

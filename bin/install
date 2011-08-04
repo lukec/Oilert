@@ -1,0 +1,13 @@
+#!/bin/bash
+INSTALL_DIR=/var/www/oilert
+
+cp -r * $INSTALL_DIR
+cp -R etc/service $INSTALL_DIR/etc/service
+if [ ! -d /etc/service/oilert-consumer ]; then \
+    update-service --add $INSTALL_DIR/etc/service/oilert-consumer oilert-consumer; \
+fi
+svc -h /etc/service/oilert-consumer
+if [ ! -d /etc/service/oilert-web ]; then \
+    update-service --add $INSTALL_DIR/etc/service/oilert-web oilert-web; \
+fi
+svc -h /etc/service/oilert-web

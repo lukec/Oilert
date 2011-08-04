@@ -35,7 +35,7 @@ my $socket_guard;
 my $last_rx_time;
 my $aishub_fh;
 sub connect_to_aishub {
-    warn "Checking connection to data.aishub.net\n";
+    print "C";
     if ($socket_guard) {
         my $duration = time() - $last_rx_time;
         if ($duration > 20*60) {

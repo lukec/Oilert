@@ -6,8 +6,12 @@ cp -R etc/service $INSTALL_DIR/etc/service
 if [ ! -d /etc/service/oilert-consumer ]; then \
     update-service --add $INSTALL_DIR/etc/service/oilert-consumer oilert-consumer; \
 fi
-svc -h /etc/service/oilert-consumer
+echo "Restarting the ais consumer"
+svc -d /etc/service/oilert-consumer
+svc -u /etc/service/oilert-consumer
 if [ ! -d /etc/service/oilert-web ]; then \
     update-service --add $INSTALL_DIR/etc/service/oilert-web oilert-web; \
 fi
-svc -h /etc/service/oilert-web
+echo "Restarting the oilert webserver"
+svc -d /etc/service/oilert-web
+svc -u /etc/service/oilert-web

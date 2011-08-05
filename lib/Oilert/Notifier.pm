@@ -44,6 +44,7 @@ method _check {
     my ($old_ship, $new_ship) = @_;
     my $mmsi = $new_ship->mmsi;
     my $name = $new_ship->name;
+    print " (Checking $name ($mmsi)) ";
 
     if ($self->redis->sismember("ships_in_bi", $mmsi)) {
         # Notice ships leaving the second narrows
@@ -110,6 +111,9 @@ method notify {
     my $link = makeashorterlink($ship->detail_url);
     my $msg = "Ship '" . $ship->{name} . "' $reason - $link - Take Action: 604-683-8220";
 
+    if (my $prefix = $self->config->{message_prefix}) {
+        $msg = $prefix . $msg;
+    }
     print " ($msg - " . length($msg) . ") ";
 
     $self->twitter->update({
@@ -125,7 +129,7 @@ method send_sms_to_all {
     my $msg = shift;
     my @recipients = $self->redis->smembers('notify');
     for my $to (@recipients) {
-        debug "Notifying $to about $msg\n";
+        print " (Notifying $to) ";
         $self->send_sms_to( $to, $msg);
     }
 }
@@ -168,7 +172,6 @@ method send_sms_to {
     my $token = $self->config->{tropo_app_token};
     my $uri = "http://api.tropo.com/1.0/sessions?action=create&token=$token"
         . "&numberToDial=$to&msg=" . uri_encode($body, 1);
-    debug "Fetching $uri";
     LWP::Simple::get($uri) or die "Couldn't fetch $uri";
 }
 

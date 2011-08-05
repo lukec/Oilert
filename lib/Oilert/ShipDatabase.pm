@@ -33,7 +33,7 @@ method save {
         my $now = DateTime->now;
         $now->set_time_zone('America/Vancouver');
         $self->db->set(last_update => $now->ymd . ' ' . $now->hms);
-        warn "Saved " . $ship->type . " $mmsi " . $ship->name . "\n";
+        print " (Saved " . $ship->name . " ($mmsi)) ";
     };
 }
 

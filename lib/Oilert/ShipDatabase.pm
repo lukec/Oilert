@@ -124,6 +124,13 @@ method scrape {
     }
 }
 
+# For testing
+method clone_with {
+    my $newship = { %$self, @_ };
+    bless $newship, ref($self);
+    return $newship;
+}
+
 method _build_polygon_east_of_second_narrows {
     Math::Polygon->new(
         [49.302181,-123.002930],

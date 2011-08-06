@@ -78,7 +78,7 @@ method _check {
         if (not $new_ship->is_near_wrmt) {
             # Ship has just left westridge marine terminal
             $new_ship->has_filled_up(1);
-            $self->redis->set_json($mmsi, $new_ship);
+            $self->redis->set_json($mmsi, $new_ship->to_hash);
 
             my @tides = map { $_->hour . ':'. $_->minute . ' ' . $_->day_name }
                         next_ebb_tides();

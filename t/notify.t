@@ -4,67 +4,58 @@ use Test::More;
 use lib 'lib';
 
 use_ok 'Oilert::Notifier';
+use_ok 'Oilert::ShipDatabase';
 
-my $notifier = Oilert::Notifier->new;
-$notifier->clear_state();
-ok $notifier, 'notifier exists';
+my $N = Oilert::Notifier->new;
+$N->clear_state();
+ok $N, 'notifier exists';
 
-my %data;
+# Create a bunch of ships for testing.
+my $base_ship = Oilert::Ship->new(
+    mmsi => 1234,
+    name => 'Test',
+    type => 'Tanker',
+);
 
-No_ships: {
-    my $res = $notifier->check(\%data);
-    is scalar(@$res), 0;
+Ship_outside_BI: {
+    my $ship = $base_ship->clone_with(
+        lat => 49.3, # within the north/south of BI
+        lon => -124.0, # west of BI
+    );
+    my $res = $N->_check(undef, $ship);
+    ok !$res, 'no notification necessary';
 }
 
-New_ship: {
-    $data{Tanker} = [
-        {
-            mmsi => 12345,
-            name => "test ship",
-            detail_url => 'http://test',
-            speed => 10,
-        }
-    ];
-    my $res = $notifier->check(\%data);
-    is scalar(@$res), 1;
-    is $res->[0]->{ship}{name}, 'test ship';
-    is $res->[0]->{reason}, "entered the Burrard Inlet";
+ship_comes_in_and_goes: {
+    my $ship = $base_ship->clone_with(
+        lat => 49.310909,
+        lon => -122.984734,
+    );
+    my $res = $N->_check(undef, $ship);
+    is $res->{reason}, 'entered the Burrard Inlet', 'correct reason';
+    $res = $N->_check(undef, $ship);
+    ok !$res, 'no notification a second time';
 
-    my $res = $notifier->check(\%data);
-    is scalar(@$res), 0, 'no duplicate notifications';
+
+    my $ship_near_wrmt = $ship->clone_with(
+        lat => 49.292023,
+        lon => -122.959068,
+    );
+    $res = $N->_check($ship, $ship_near_wrmt);
+    is $res->{reason}, 'docked at Westridge', 'correct reason';
+    
+    $res = $N->_check($ship_near_wrmt, $ship);
+    is $res->{reason}, 'left westridge', 'correct reason';
+    exit;
+
+
+    my $outside = $ship->clone_with(
+        lat => 49.3, # within the north/south of BI
+        lon => -124.0, # west of BI
+    );
+    $res = $N->_check($ship, $outside);
+    is $res->{reason}, 'left the Burrard Inlet', 'correct reason';
 }
 
-Ship_stops_moving: {
-    $data{Tanker}[0]{speed} = 0.1;
-    my $res = $notifier->check(\%data);
-    is scalar(@$res), 1;
-    is $res->[0]->{ship}{name}, 'test ship';
-    is $res->[0]->{reason}, "stopped moving";
-
-    my $res = $notifier->check(\%data);
-    is scalar(@$res), 0, 'no duplicate notifications';
-}
-
-Ship_starts_moving: {
-    $data{Tanker}[0]{speed} = 7;
-    my $res = $notifier->check(\%data);
-    is scalar(@$res), 1;
-    is $res->[0]->{ship}{name}, 'test ship';
-    is $res->[0]->{reason}, "started moving";
-
-    my $res = $notifier->check(\%data);
-    is scalar(@$res), 0, 'no duplicate notifications';
-}
-
-Ship_leaves: {
-    $data{Tanker} = [];
-    my $res = $notifier->check(\%data);
-    is scalar(@$res), 1;
-    is $res->[0]->{ship}{name}, 'test ship';
-    is $res->[0]->{reason}, "left the Burrard Inlet";
-
-    my $res = $notifier->check(\%data);
-    is scalar(@$res), 0, 'no duplicate notifications';
-}
 
 done_testing();

@@ -70,7 +70,7 @@ sub connect_to_aishub {
                         my $new_ship = $shipdb->get_ship($mmsi);
                         unless ($new_ship->type =~ m/^tanker/i) {
                             $shipdb->ignore($mmsi);
-                            print "IGNORE:$mmsi";
+                            print " (IGNORE:$mmsi:" . $new_ship->type . ") ";
                             next;
                         }
                         $new_ship->lat($msg->{y});

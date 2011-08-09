@@ -17,16 +17,16 @@ my $base_ship = Oilert::Ship->new(
     type => 'Tanker',
 );
 
-Ship_outside_BI: {
+subtest Ship_outside_BI => sub {
     my $ship = $base_ship->clone_with(
         lat => 49.3, # within the north/south of BI
         lon => -124.0, # west of BI
     );
     my $res = $N->_check(undef, $ship);
     ok !$res, 'no notification necessary';
-}
+};
 
-ship_comes_in_and_goes: {
+subtest ship_comes_in_and_goes => sub {
     my $ship = $base_ship->clone_with(
         lat => 49.310909,
         lon => -122.984734,
@@ -43,19 +43,20 @@ ship_comes_in_and_goes: {
     );
     $res = $N->_check($ship, $ship_near_wrmt);
     is $res->{reason}, 'docked at Westridge', 'correct reason';
+    $res = $N->_check($ship, $ship_near_wrmt);
+    ok !$res, 'no notification a second time';
     
     $res = $N->_check($ship_near_wrmt, $ship);
-    is $res->{reason}, 'left westridge', 'correct reason';
-    exit;
-
+    like $res->{reason}, qr/filled up with oil, probably will leave at \d+:\d+/, 'correct reason';
+    $res = $N->_check($ship_near_wrmt, $ship);
+    ok !$res, 'no notification a second time';
 
     my $outside = $ship->clone_with(
         lat => 49.3, # within the north/south of BI
         lon => -124.0, # west of BI
     );
     $res = $N->_check($ship, $outside);
-    is $res->{reason}, 'left the Burrard Inlet', 'correct reason';
-}
-
+    is $res->{reason}, 'left the Burrard Inlet full of oil', 'correct reason';
+};
 
 done_testing();

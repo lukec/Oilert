@@ -91,7 +91,7 @@ method _check {
             };
         }
         else {
-            print " (" . $new_ship->name . " is at WRMT) ";
+            print " (" . $new_ship->name . " is at WRMT" . $new_ship->location_str . ") ";
         }
     }
     else {
@@ -102,6 +102,9 @@ method _check {
                 reason => "docked at Westridge",
                 ship => $new_ship,
             };
+        }
+        else {
+            print " (" . $new_ship->name . " is not near WRMT) ";
         }
     }
 

@@ -76,6 +76,7 @@ method _check {
     # Check for ships filling up at Westridge Marine Terminal
     if ($self->redis->sismember("ships_at_WRMT", $mmsi)) {
         if (not $new_ship->is_near_wrmt) {
+            warn "Ship was at WRMT but now is not near it: " . $new_ship->location_str;
             # Ship has just left westridge marine terminal
             $new_ship->has_filled_up(1);
             $self->redis->set_json($mmsi, $new_ship->to_hash);
@@ -88,6 +89,9 @@ method _check {
                 reason => "filled up with oil, probably will leave at $ebb_t",
                 ship => $new_ship,
             };
+        }
+        else {
+            print " (" . $new_ship->name . " is at WRMT) ";
         }
     }
     else {

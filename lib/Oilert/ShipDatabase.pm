@@ -83,6 +83,8 @@ method as_string {
     return $self->name . ' (' . $self->mmsi . ') last-update=' . $dt;
 }
 
+method location_str { "Lat/Lon: " . $self->lat . '/' . $self->lon }
+
 method is_a_tanker {
     $self->scrape unless $self->type;
     return $self->type eq 'Tanker'

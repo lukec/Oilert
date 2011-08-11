@@ -8,10 +8,14 @@
             [% FOREACH ship IN ships %]
               <li><a href="[% ship.detail_url %]">[% ship.name %]</a> - [% ship.type %]
                   - 
-                  [% IF ship.speed > 0.5 %]
-                    Moving at [% ship.speed %] knots
+                  [% IF ship.is_near_wrmt %]
+                  Docked at Westridge Marine Terminal
                   [% ELSE %]
-                    Stopped
+                    [% IF ship.speed > 0.5 %]
+                      Moving at [% ship.speed %] knots
+                    [% ELSE %]
+                      Stopped
+                    [% END %]
                   [% END %]
                   - (<a
                     href="http://www.marinetraffic.com/ais/default.aspx?zoom=10&mmsi=[% ship.mmsi %]&centerx=[% ship.lon %]&centery=[% ship.lat %]">map</a>) - (<a href="http://www.portarrivals.com/vsl.asp?item=[% ship.mmsi %]">Ports</a>, <a href="http://aprs.fi/info/[% ship.mmsi %]">Details</a>, <a href="http://www.google.ca/#q=[% ship.name %]+[% ship.mmsi %]">Google</a>)

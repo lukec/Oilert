@@ -9,6 +9,8 @@
   <p>
   Enter your password: 
   <input type="password" name="password" value="" length="16" />
+  </p>
+  <p>Tweet it too? <input type="checkbox" name="tweet_it" value="1" /></p>
   <input id="submit_btn" type="submit" value="Blast!" />
 </div>
 <script>

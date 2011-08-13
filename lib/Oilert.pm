@@ -70,8 +70,10 @@ post '/blast' => sub {
             $message = substr $message, 0, 140;
             debug "Sending a BLAST to everyone for '$message'";
             $notifier->send_sms_to_all($message);
-            $notifier->twitter->update({ status => $message }) if $notifier->twitter;
-            $ui_message = "Sent the blast to everyone.";
+            $notifier->twitter->update({ status => $message })
+                if $notifier->twitter and params->{tweet_it};
+            my $count = @{ $notifier->sms_recipients };
+            $ui_message = "Sent the blast to $count recipients.";
         }
         else {
             $ui_message = "No message provided.";

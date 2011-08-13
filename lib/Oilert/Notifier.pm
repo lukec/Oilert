@@ -132,10 +132,13 @@ method notify {
     $self->send_sms_to_all($msg);
 }
 
+method sms_recipients {
+    return [ $self->redis->smembers('notify') ];
+}
+
 method send_sms_to_all {
     my $msg = shift;
-    my @recipients = $self->redis->smembers('notify');
-    for my $to (@recipients) {
+    for my $to (@{ $self->sms_recipients }) {
         print " (Notifying $to) ";
         $self->send_sms_to( $to, $msg);
     }

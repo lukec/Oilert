@@ -2,19 +2,16 @@ package Oilert::Notifier;
 use 5.12.0;
 use Dancer ':syntax';
 use Moose;
-use YAML qw/LoadFile/;
-use Oilert::Redis;
+use Oilert::WorkQueue;
 use WWW::Shorten 'Googl';
-use FindBin;
 use Net::Twitter;
 use LWP::Simple ();
-use URI::Encode qw/uri_encode/;
-use methods;
 use DateTime;
+use methods;
 
-has 'config' => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 has 'twitter' => (is => 'ro', isa => 'Maybe[Net::Twitter]', lazy_build => 1);
-has 'redis'  => (is => 'ro', isa => 'Oilert::Redis', lazy_build => 1);
+
+with 'Oilert::Base';
 
 method add_subscriber {
     my $num = shift;
@@ -183,15 +180,17 @@ sub next_ebb_tides {
     return @tides;
 }
 
+# This method just enqueues the text to be sent - it does not send it.
 method send_sms_to {
     my $to = shift;
     my $body = shift;
 
     $to =~ s/^\+1//;
-    my $token = $self->config->{tropo_app_token};
-    my $uri = "http://api.tropo.com/1.0/sessions?action=create&token=$token"
-        . "&numberToDial=$to&msg=" . uri_encode($body, 1);
-    LWP::Simple::get($uri) or die "Couldn't fetch $uri";
+    Oilert::WorkQueue->new->add({
+        type => 'SendSMS',
+        to => $to,
+        body => $body,
+    });
 }
 
 method clear_state {
@@ -199,13 +198,6 @@ method clear_state {
         warn "Deleting $key";
         $self->redis->del($key);
     }
-}
-
-method _build_config {
-    my $file = "/home/dotcloud/services.yaml";
-    $file = "$FindBin::Bin/etc/services.yaml" unless -e $file;
-    $file = "$FindBin::Bin/../etc/services.yaml" unless -e $file;
-    return LoadFile($file) or die "Can't load services config";
 }
 
 method _build_twitter {
@@ -220,4 +212,3 @@ method _build_twitter {
     return $t;
 }
 
-method _build_redis { Oilert::Redis->new }

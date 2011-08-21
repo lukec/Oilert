@@ -7,6 +7,7 @@ use Cwd qw/realpath/;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Oilert::ShipDatabase;
+use Oilert::WorkQueue;
 use AnyEvent;
 use AnyEvent::Socket;
 use Try::Tiny;
@@ -23,6 +24,7 @@ my $w = AnyEvent->signal(signal => "INT", cb => sub {
         $cv->send;
     });
 my $shipdb = Oilert::ShipDatabase->new;
+my $work_q = Oilert::WorkQueue->new;
 
 use Inline Python => <<'END';
 import ais
@@ -89,6 +91,10 @@ sub connect_to_aishub {
 my $reconnect_timer = AnyEvent->timer(
     after => 0.01, interval => 900.0,
     cb => \&connect_to_aishub,
+);
+
+my $job_timer = AnyEvent->timer(after => 1, interval => 5,
+    cb => sub { $work_q->run_jobs() }
 );
 
 $cv->recv;

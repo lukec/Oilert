@@ -70,6 +70,7 @@ has 'type' => (is => 'rw', isa => 'Str');
 has 'speed' => (is => 'rw', isa => 'Num', default => 0);
 has 'has_filled_up' => (is => 'rw', isa => 'Bool', default => 0);
 has 'last_update' => (is => 'rw', isa => 'Num', default => sub { time });
+has 'length' => (is => 'rw', isa => 'Maybe[Num]');
 
 has 'polygon_east_of_second_narrows'  => (is => 'ro', lazy_build => 1);
 has 'polygon_near_westridge_terminal' => (is => 'ro', lazy_build => 1);
@@ -88,6 +89,11 @@ method location_str { "Lat/Lon: " . $self->lat . '/' . $self->lon }
 method is_a_tanker {
     $self->scrape unless $self->type;
     return $self->type eq 'Tanker'
+}
+
+method is_textable {
+    $self->scrape unless $self->type and $self->length;
+    return $self->type eq 'Tanker' and $self->length > 0;
 }
 
 method to_hash {
@@ -120,6 +126,8 @@ method scrape {
         $self->type($1 || 'Unknown');
         $content =~ m/title='([^']+)'/;
         $self->name($1 || 'No-Name');
+        $content =~ m(<b>Length x Breadth:</b>\s*(\d+)\s+m\s+X);
+        $self->length($1 || 0);
     }
     else {
         warn "Failed to scrape " . $self->detail_url;

@@ -1,10 +1,11 @@
 #!/bin/bash
 INSTALL_DIR=/var/www/oilert
 
+rm -f $INSTALL_DIR/etc/services.yaml
 cp -r * $INSTALL_DIR
 cp -R etc/service $INSTALL_DIR/etc/service
 if [[ -e /etc/oilert.yaml ]]; then
-    cp /etc/oilert.yaml $INSTALL_DIR/etc/services.yaml
+    ln -f -s /etc/oilert.yaml $INSTALL_DIR/etc/services.yaml
 fi
 if [ ! -d /etc/service/oilert-consumer ]; then \
     update-service --add $INSTALL_DIR/etc/service/oilert-consumer oilert-consumer; \

@@ -15,6 +15,9 @@
                       Moving at [% ship.speed %] knots
                     [% ELSE %]
                       Stopped
+                      [% IF ship.has_filled_up %]
+                        (likely full of oil!)
+                      [% END %]
                     [% END %]
                   [% END %]
                   - (<a

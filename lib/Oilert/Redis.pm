@@ -8,7 +8,10 @@ use JSON qw/encode_json decode_json/;
 use Try::Tiny;
 
 has 'redis' => (is => 'ro', isa => 'Redis', lazy_build => 1, 
-                handles => [qw/get set del sismember rpush type sadd srem smembers keys/]);
+                handles => [
+                    qw/get set del sismember rpush type sadd srem smembers keys
+                       rpush lpush rpop lpop/
+                ]);
 
 method set_json {
     my $key = shift;

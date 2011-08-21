@@ -69,6 +69,7 @@ method _check {
             return {
                 reason => "entered the Burrard Inlet",
                 ship   => $new_ship,
+                textable => 1,
             };
         }
     }
@@ -129,7 +130,7 @@ method notify {
         long => $ship->lng
     }) if $self->twitter;
 
-    $self->send_sms_to_all($msg);
+    $self->send_sms_to_all($msg) if $notif->{textable} and $ship->is_textable;
 }
 
 method sms_recipients {

@@ -138,6 +138,14 @@ method sms_recipients {
 
 method send_sms_to_all {
     my $msg = shift;
+
+    my $now = DateTime->now;
+    $now->set_time_zone('America/Vancouver');
+    if ($now->hour < 7 or $now->hour > 22) {
+        print " (Skipping night-time Texting) ";
+        return;
+    }
+
     for my $to (@{ $self->sms_recipients }) {
         print " (Notifying $to) ";
         $self->send_sms_to( $to, $msg);

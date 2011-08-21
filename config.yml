@@ -7,6 +7,9 @@ appname: "Oilert"
 layout: "main"
 auto_page: 1
 
+sysadmin_email: "lukecloss@gmail.com"
+email_from: "oilert@recollect.net"
+
 # when the charset is set to UTF-8 Dancer will handle for you
 # all the magic of encoding and decoding. You should not care
 # about unicode within your app when this setting is set (recommended).

@@ -35,6 +35,7 @@ method save {
         $self->db->set(last_update => $now->ymd . ' ' . $now->hms);
         print " (Saved " . $ship->name . " ($mmsi)) ";
     };
+    warn $@ if $@;
 }
 
 method ships {
@@ -74,6 +75,7 @@ has 'length' => (is => 'rw', isa => 'Maybe[Num]');
 
 has 'polygon_east_of_second_narrows'  => (is => 'ro', lazy_build => 1);
 has 'polygon_near_westridge_terminal' => (is => 'ro', lazy_build => 1);
+has 'polygon_for_webcam'              => (is => 'ro', lazy_build => 1);
 
 method detail_url {
     "http://marinetraffic.com/ais/shipdetails.aspx?mmsi=".$self->mmsi;
@@ -111,6 +113,10 @@ method is_in_binlet {
 method is_near_wrmt {
     $self->polygon_near_westridge_terminal->contains(
         [ $self->lat, $self->lon ]);
+}
+
+method is_in_webcam_range {
+    $self->polygon_for_webcam->contains([ $self->lat, $self->lon ]);
 }
 
 method scrape {
@@ -164,6 +170,15 @@ method _build_polygon_near_westridge_terminal {
         [49.2896,-122.9469],
         [49.2875,-122.9677],
         [49.2921,-122.9677],
+    );
+}
+
+method _build_polygon_for_webcam {
+    Math::Polygon->new(
+        [49.3107,-123.0939],
+        [49.3053,-123.0803],
+        [49.2847,-123.1096],
+        [49.3107,-123.0939],
     );
 }
 

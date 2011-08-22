@@ -9,6 +9,7 @@ auto_page: 1
 
 sysadmin_email: "lukecloss@gmail.com"
 email_from: "oilert@recollect.net"
+webcam_notif_recips: "6046838220,6047104340"
 
 # when the charset is set to UTF-8 Dancer will handle for you
 # all the magic of encoding and decoding. You should not care

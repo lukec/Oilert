@@ -106,6 +106,18 @@ method _check {
         }
     }
 
+    if ($new_ship->is_in_webcam_range) {
+        my $now = DateTime->now; $now->set_time_zone('America/Vancouver');
+        my $webcam_key = $now->ymd . "-" . $new_ship->mmsi;
+        if (!$self->redis->sismember(webcam => $webcam_key)) {
+            $self->redis->sadd(webcam => $webcam_key);
+            return {
+                reason => "is in webcam range, please verify if you can",
+                ship => $new_ship,
+                wc_only => 1,
+            };
+        }
+    }
     return undef;
 }
 
@@ -120,6 +132,16 @@ method notify {
         $msg = $prefix . $msg;
     }
     print " ($msg - " . length($msg) . ") ";
+
+    if ($notif->{wc_only}) {
+        # This is an internal-only text
+        my @recips = split ",", config->{webcam_notif_recips};
+        for my $r (@recips) {
+            print " (Webcam to $r) ";
+            $self->send_sms_to($r, $msg);
+        }
+        return;
+    }
 
     $self->twitter->update({
         status => $msg, 

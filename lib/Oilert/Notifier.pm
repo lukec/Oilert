@@ -126,7 +126,7 @@ method notify {
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
     my $link = makeashorterlink($ship->detail_url);
-    my $msg = "Ship '" . $ship->{name} . "' $reason - $link - Take Action: 604-683-8220";
+    my $msg = "Tanker '" . $ship->{name} . "' $reason - $link - Take Action: 604-683-8220";
 
     if (my $prefix = $self->config->{message_prefix}) {
         $msg = $prefix . $msg;

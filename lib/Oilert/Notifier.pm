@@ -166,6 +166,7 @@ method send_sms_to_all {
         return;
     }
 
+    print " (Notification: '$msg') ";
     for my $to (@{ $self->sms_recipients }) {
         print " (Notifying $to) ";
         $self->send_sms_to( $to, $msg);

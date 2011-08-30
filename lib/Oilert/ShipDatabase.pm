@@ -90,12 +90,12 @@ method location_str { "Lat/Lon: " . $self->lat . '/' . $self->lon }
 
 method is_a_tanker {
     $self->scrape unless $self->type;
-    return $self->type eq 'Tanker'
+    return $self->type =~ m/^tanker/i;
 }
 
 method is_textable {
     $self->scrape unless $self->type and $self->length;
-    return $self->type eq 'Tanker' and $self->length > 0;
+    return $self->is_a_tanker and $self->length > 0;
 }
 
 method to_hash {

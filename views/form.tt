@@ -3,10 +3,10 @@
           <form action="/notify" method="POST">
           <h2>Notify me!</h2>
           <p>Sign up for text messages when ships arrive, leave, stop or start moving.</p>
-          <input type="text" name="signup_number" value="Your Mobile Number" />
-          <input id="submit_btn" type="submit" value="Start!" />
+          <p><strong>Text GO to 604-800-9180</strong></p>
           <h2>Stop notifying me!</h2>
-          <p>Had enough? Enter your number to stop notifications.</p>
+          <p>Had enough?</p>
+          <p><strong>Text STOP to 604-800-9180</strong> or enter your number here:</p>
           <input type="text" name="stop_number" value="Your Mobile Number" />
           <input id="submit_btn" type="submit" value="Stop!" />
           </form>

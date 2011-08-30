@@ -1,8 +1,9 @@
         <div id="ships">
-          <h1>Ships in Burrard Inlet Right Now</h1>
+          <h1>Tankers we're watching</h1>
+          <p>These oil tankers are in the Burrard Inlet east of the Second Narrows.</p>
                     
           [% IF ships.size == 0 %]
-            <p>No ships are in the Burrard Inlet right now.</p>
+            <p>There are no ships are in the Burrard Inlet right now.</p>
           [% ELSE %]
             <ul>
             [% FOREACH ship IN ships %]

@@ -73,6 +73,13 @@ has 'has_filled_up' => (is => 'rw', isa => 'Bool', default => 0);
 has 'last_update' => (is => 'rw', isa => 'Num', default => sub { time });
 has 'length' => (is => 'rw', isa => 'Maybe[Num]');
 
+method to_hash {
+    return {
+        map { $_ => $self->$_ } 
+        qw/mmsi lat lon name has_filled_up type speed last_update length/
+    }
+}
+
 has 'polygon_east_of_second_narrows'  => (is => 'ro', lazy_build => 1);
 has 'polygon_near_westridge_terminal' => (is => 'ro', lazy_build => 1);
 has 'polygon_for_webcam'              => (is => 'ro', lazy_build => 1);
@@ -95,14 +102,7 @@ method is_a_tanker {
 
 method is_textable {
     $self->scrape unless $self->type and $self->length;
-    return $self->is_a_tanker and $self->length > 0;
-}
-
-method to_hash {
-    return {
-        map { $_ => $self->$_ } 
-        qw/mmsi lat lon name has_filled_up type speed last_update/
-    }
+    return $self->is_a_tanker && $self->length > 200;
 }
 
 method is_in_binlet {

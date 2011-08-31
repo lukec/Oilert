@@ -9,7 +9,7 @@ use LWP::Simple ();
 use DateTime;
 use methods;
 
-has 'twitter' => (is => 'ro', isa => 'Maybe[Net::Twitter]', lazy_build => 1);
+has 'twitter' => (is => 'ro', isa => 'Net::Twitter', lazy_build => 1);
 
 with 'Oilert::Base';
 
@@ -101,9 +101,6 @@ method _check {
                 ship => $new_ship,
             };
         }
-        else {
-            print " (" . $new_ship->name . " is not near WRMT) ";
-        }
     }
 
     if ($new_ship->is_in_webcam_range) {
@@ -143,11 +140,13 @@ method notify {
         return;
     }
 
-    $self->twitter->update({
+    my $status = $self->twitter->update({
         status => $msg, 
         lat => $ship->lat,
         long => $ship->lng
     }) if $self->twitter;
+    use Data::Dumper;
+    print Dumper($status);
 
     $self->send_sms_to_all($msg) if $notif->{textable} and $ship->is_textable;
 }

@@ -7,6 +7,8 @@ use WWW::Shorten 'Googl';
 use Net::Twitter;
 use LWP::Simple ();
 use DateTime;
+use Try::Tiny;
+use Oilert::Util qw/email_admin/;
 use methods;
 
 has 'twitter' => (is => 'ro', isa => 'Net::Twitter', lazy_build => 1);
@@ -141,15 +143,26 @@ method notify {
         return;
     }
 
-    my $status = $self->twitter->update({
-        status => $msg, 
-        lat => $ship->lat,
-        long => $ship->lng
-    }) if $self->twitter;
-    use Data::Dumper;
-    print Dumper($status);
+    try {
+        my $status = $self->twitter->update({
+            status => $msg, 
+            lat => $ship->lat,
+            long => $ship->lng
+        }) if $self->twitter;
+        use Data::Dumper;
+        print Dumper($status);
+    }
+    catch {
+        email_admin("Oilert error: tweeting", $_);
+    }
 
-    $self->send_sms_to_all($msg) if $notif->{textable} and $ship->is_textable;
+    try {
+        $self->send_sms_to_all($msg)
+            if $notif->{textable} and $ship->is_textable;
+    }
+    catch {
+        email_admin("Oilert error: texting", $_);
+    }
 }
 
 method sms_recipients {

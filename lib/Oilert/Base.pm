@@ -15,6 +15,7 @@ method _build_config {
     my $file = "/home/dotcloud/services.yaml";
     $file = "$FindBin::Bin/etc/services.yaml" unless -e $file;
     $file = "$FindBin::Bin/../etc/services.yaml" unless -e $file;
+    warn "Loading $file\n";
     return try { $config ||= LoadFile($file) }
     catch { die "Yaml could not open $file: $_" };
 }

@@ -86,6 +86,7 @@ method _check {
             return {
                 reason => "filled up with oil, probably will leave at $ebb_t",
                 ship => $new_ship,
+                textable => 1,
             };
         }
         else {

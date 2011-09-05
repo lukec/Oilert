@@ -19,6 +19,8 @@ my $base_ship = Oilert::Ship->new(
     mmsi => $test_mmsi,
     name => 'Test',
     type => 'Tanker',
+    # Default to inside binlet but not at WRMT
+    lat => 49.310, lon => -122.984,
 );
 
 subtest Ship_outside_BI => sub {
@@ -69,6 +71,12 @@ subtest ship_comes_in_and_goes => sub {
     );
     $res = $N->_check($ship, $outside);
     is $res->{reason}, 'left the Burrard Inlet full of oil', 'correct reason';
+};
+
+subtest ship_is_a_tug => sub { # Sometimes ships re-lable themselves as Tugs
+    my $tanker = $base_ship->clone_with( type => 'Tug' );
+    my $res = $N->_check(undef, $tanker);
+    is $res->{reason}, 'entered the Burrard Inlet', 'correct reason';
 };
 
 done_testing();

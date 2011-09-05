@@ -84,6 +84,10 @@ has 'polygon_east_of_second_narrows'  => (is => 'ro', lazy_build => 1);
 has 'polygon_near_westridge_terminal' => (is => 'ro', lazy_build => 1);
 has 'polygon_for_webcam'              => (is => 'ro', lazy_build => 1);
 
+method is_important {
+    $self->type =~ m/^(tanker|tug)/i
+}
+
 method detail_url {
     "http://marinetraffic.com/ais/shipdetails.aspx?mmsi=".$self->mmsi;
 }

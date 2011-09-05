@@ -92,7 +92,7 @@ method _check {
             };
         }
         else {
-            print " (" . $new_ship->name . " is at WRMT" . $new_ship->location_str . ") ";
+            print " (" . $new_ship->name . " is at WRMT " . $new_ship->location_str . ") ";
         }
     }
     else {

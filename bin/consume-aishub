@@ -96,5 +96,11 @@ my $reconnect_timer = AnyEvent->timer(
 my $job_timer = AnyEvent->timer(after => 1, interval => 5,
     cb => sub { $work_q->run_jobs() }
 );
+my $restart_timer = AnyEvent->timer(after => 7200, interval => 0,
+    cb => sub {
+        print "Hit 2 hour limit.\n";
+        $cv->send;
+    },
+);
 
 $cv->recv;

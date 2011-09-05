@@ -73,6 +73,8 @@ has 'has_filled_up' => (is => 'rw', isa => 'Bool', default => 0);
 has 'last_update' => (is => 'rw', isa => 'Num', default => sub { time });
 has 'length' => (is => 'rw', isa => 'Maybe[Num]');
 
+my $Important_ship_length = 200;
+
 method to_hash {
     return {
         map { $_ => $self->$_ } 
@@ -85,7 +87,9 @@ has 'polygon_near_westridge_terminal' => (is => 'ro', lazy_build => 1);
 has 'polygon_for_webcam'              => (is => 'ro', lazy_build => 1);
 
 method is_important {
-    $self->type =~ m/^(tanker|tug)/i
+    return 1 if $self->type =~ m/^tanker/i;
+    return 1 if $self->type =~ m/^tug/i && $self->length > $Important_ship_length;
+    return 0;
 }
 
 method detail_url {
@@ -106,7 +110,7 @@ method is_a_tanker {
 
 method is_textable {
     $self->scrape unless $self->type and $self->length;
-    return $self->is_a_tanker && $self->length > 200;
+    return $self->is_a_tanker && $self->length > $Important_ship_length;
 }
 
 method is_in_binlet {

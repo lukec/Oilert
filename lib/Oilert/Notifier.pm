@@ -144,13 +144,11 @@ method notify {
     }
 
     try {
-        my $status = $self->twitter->update({
+        $self->twitter->update({
             status => $msg, 
             lat => $ship->lat,
             long => $ship->lon
         }) if $self->twitter;
-        use Data::Dumper;
-        print Dumper($status);
     }
     catch {
         email_admin("Oilert error: tweeting", $_);

@@ -147,7 +147,7 @@ method notify {
         my $status = $self->twitter->update({
             status => $msg, 
             lat => $ship->lat,
-            long => $ship->lng
+            long => $ship->lon
         }) if $self->twitter;
         use Data::Dumper;
         print Dumper($status);

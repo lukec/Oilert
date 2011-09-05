@@ -1,5 +1,5 @@
 package Oilert::Redis;
-use 5.12.0;
+use 5.10.0;
 use Dancer ':syntax';
 use methods;
 use Moose;

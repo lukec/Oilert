@@ -93,7 +93,7 @@ method _check {
             return {
                 reason => "filled up with oil, prob will leave @ $ebb_t",
                 ship => $new_ship,
-                textable => 1,
+                textable => 0,
             };
         }
         else {

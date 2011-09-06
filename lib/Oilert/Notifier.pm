@@ -81,12 +81,17 @@ method _check {
             $new_ship->has_filled_up(1);
             $self->redis->set_json($mmsi, $new_ship->to_hash);
 
-            my @tides = map { $_->hour . ':'. $_->minute . ' ' . $_->day_name }
+            my %short_day = (
+                monday => 'Mon', tuesday => 'Tues', wednesday => 'Weds', 
+                thursday => 'Thurs', friday => 'Fri', saturday => 'Sat', 
+                sunday => 'sun',
+            );
+            my @tides = map { $_->hour . ':'. $_->minute . ' ' . $short_day{lc $_->day_name} }
                         next_ebb_tides();
             my $ebb_t = join ' or ', @tides;
             $self->redis->srem("ships_at_WRMT", $mmsi);
             return {
-                reason => "filled up with oil, probably will leave at $ebb_t",
+                reason => "filled up with oil, prob will leave @ $ebb_t",
                 ship => $new_ship,
                 textable => 1,
             };
@@ -126,7 +131,7 @@ method notify {
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
     my $link = makeashorterlink($ship->detail_url);
-    my $msg = "Tanker '" . $ship->{name} . "' $reason - $link - Take Action: 604-683-8220";
+    my $msg = "$ship->{name} $reason $link Take Action: 604-683-8220";
 
     if (my $prefix = $self->config->{message_prefix}) {
         $msg = $prefix . $msg;

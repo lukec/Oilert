@@ -137,6 +137,10 @@ method scrape {
         $self->name($1 || 'No-Name');
         $content =~ m(<b>Length x Breadth:</b>\s*(\d+)\s+m\s+X);
         $self->length($1 || 0);
+
+        if ($self->type =~ m/^tug/i and $self->length > 100) {
+            $self->type("Tanker (Tug)");
+        }
         print " (Scraped "
             . $self->type . " "
             . $self->name . " - "

@@ -86,14 +86,16 @@ method _check {
                 thursday => 'Thurs', friday => 'Fri', saturday => 'Sat', 
                 sunday => 'sun',
             );
-            my @tides = map { $_->hour . ':'. $_->minute . ' ' . $short_day{lc $_->day_name} }
-                        next_ebb_tides();
-            my $ebb_t = join ' or ', @tides;
+            # We decided to ignore tides, so we aren't using this data
+            # anymore, for now.
+#             my @tides = map { $_->hour . ':'. $_->minute . ' ' . $short_day{lc $_->day_name} }
+#                         next_ebb_tides();
+#             my $ebb_t = join ' or ', @tides;
             $self->redis->srem("ships_at_WRMT", $mmsi);
             return {
-                reason => "filled up with oil, prob will leave @ $ebb_t",
+                reason => "filled up with oil, will leave soon.",
                 ship => $new_ship,
-                textable => 0,
+                textable => 1,
             };
         }
         else {

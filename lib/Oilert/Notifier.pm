@@ -162,8 +162,7 @@ method notify {
     }
 
     try {
-        $self->send_sms_to_all($msg)
-            if $notif->{textable} and $ship->is_textable;
+        $self->send_sms_to_all($msg) if $notif->{textable};
     }
     catch {
         email_admin("Oilert error: texting", $_);

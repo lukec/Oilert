@@ -108,11 +108,6 @@ method is_a_tanker {
     return $self->type =~ m/^tanker/i;
 }
 
-method is_textable {
-    $self->scrape unless $self->type and $self->length;
-    return $self->is_a_tanker && $self->length > $Important_ship_length;
-}
-
 method is_in_binlet {
     $self->polygon_east_of_second_narrows->contains(
         [ $self->lat, $self->lon ]);

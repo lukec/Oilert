@@ -101,7 +101,6 @@ my $morning_timer = AnyEvent->timer(
         my $dt = DateTime->now;
         $dt->set_time_zone('America/Vancouver');
         return unless $dt->hour >= 8;
-        print " Good Morning ";
 
         my $redis = Oilert::Redis->new;
         my $notifier;

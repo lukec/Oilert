@@ -179,7 +179,8 @@ method send_sms_to_all {
     my $now = DateTime->now;
     $now->set_time_zone('America/Vancouver');
     if ($now->hour < 7 or $now->hour > 22) {
-        print " (Skipping night-time Texting) ";
+        print " (Queue-ing night-time text) ";
+        $self->redis->rpush('night-time', $msg);
         return;
     }
 

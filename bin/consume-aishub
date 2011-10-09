@@ -8,6 +8,8 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Oilert::ShipDatabase;
 use Oilert::WorkQueue;
+use Oilert::Redis;
+use Oilert::Notifier;
 use AnyEvent;
 use AnyEvent::Socket;
 use Try::Tiny;
@@ -91,6 +93,21 @@ sub connect_to_aishub {
 my $reconnect_timer = AnyEvent->timer(
     after => 0.01, interval => 900.0,
     cb => \&connect_to_aishub,
+);
+my $morning_timer = AnyEvent->timer(
+    after => 0.01, interval => 900.0,
+    cb => sub {
+        my $dt = DateTime->now;
+        $dt->set_time_zone('America/Vancouver');
+        return unless $dt->hour >= 8;
+
+        my $redis = Oilert::Redis->new;
+        my $notifier;
+        while(my $msg = $redis->lpop('night-time')) {
+            $notifier ||= Oilert::Notifier->new;
+            $notifier->send_sms_to_all($msg);
+        }
+    }
 );
 
 my $job_timer = AnyEvent->timer(after => 1, interval => 5,

@@ -97,9 +97,11 @@ my $reconnect_timer = AnyEvent->timer(
 my $morning_timer = AnyEvent->timer(
     after => 0.01, interval => 900.0,
     cb => sub {
+        print "M";
         my $dt = DateTime->now;
         $dt->set_time_zone('America/Vancouver');
         return unless $dt->hour >= 8;
+        print " Good Morning ";
 
         my $redis = Oilert::Redis->new;
         my $notifier;

@@ -133,7 +133,8 @@ method notify {
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
     my $link = makeashorterlink($ship->detail_url);
-    my $msg = "$ship->{name} ($ship->{length} meters) $reason $link Take Action: 604-683-8220";
+    my $length = $ship->length ? " ($ship->{length} meters)" : '';
+    my $msg = "$ship->{name}$length $reason $link Take Action: 604-683-8220";
 
     if (my $prefix = $self->config->{message_prefix}) {
         $msg = $prefix . $msg;

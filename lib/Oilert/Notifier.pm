@@ -68,7 +68,6 @@ method _check {
             return {
                 reason => "entered the Burrard Inlet",
                 ship   => $new_ship,
-                textable => 1,
             };
         }
     }
@@ -95,7 +94,6 @@ method _check {
             return {
                 reason => "filled up with oil, will leave soon.",
                 ship => $new_ship,
-                textable => 1,
             };
         }
         else {
@@ -107,8 +105,9 @@ method _check {
             # Ship just arrived at WRMT
             $self->redis->sadd("ships_at_WRMT", $mmsi);
             return {
-                reason => "docked at Westridge",
+                reason => "at Kinder Morgan terminal",
                 ship => $new_ship,
+                textable => 1,
             };
         }
     }
@@ -132,8 +131,8 @@ method notify {
     my $notif = shift;
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
-    my $link = "http://goo.gl/jc2aX";
-    my $length = $ship->length ? " ($ship->{length} meters)" : '';
+    my $link = "http://WildernessCommittee.org/tankers";
+    my $length = $ship->length ? " ($ship->{length}m)" : '';
     my $msg = "$ship->{name}$length $reason $link Take Action: 604-683-8220";
 
     if (my $prefix = $self->config->{message_prefix}) {

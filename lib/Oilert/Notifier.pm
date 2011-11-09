@@ -132,7 +132,7 @@ method notify {
     my $notif = shift;
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
-    my $link = makeashorterlink($ship->detail_url);
+    my $link = "http://goo.gl/jc2aX";
     my $length = $ship->length ? " ($ship->{length} meters)" : '';
     my $msg = "$ship->{name}$length $reason $link Take Action: 604-683-8220";
 

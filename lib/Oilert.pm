@@ -35,7 +35,7 @@ get '/sms'   => sub {
             debug "Stopping sending to $from";
             $notifier->remove_subscriber($from);
         }
-        elsif ($msg =~ m/^(yes|start|go|sub)/) {
+        elsif ($msg =~ m/^(yes|start|go|sub|oil)/) {
             $notifier->add_subscriber($from);
         }
         else {

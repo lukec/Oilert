@@ -133,11 +133,11 @@ method scrape {
     if ($resp->code == 200) {
         my $content = $resp->content;
         $content =~ m(<b>Ship Type:</b>\s*(\w+)<br/>);
-        $self->type($1 || 'Unknown');
+        $self->type($1 || $self->type || 'Unknown');
         $content =~ m/title='([^']+)'/;
-        $self->name($1 || 'No-Name');
+        $self->name($1 || $self->name || 'No-Name');
         $content =~ m(<b>Length x Breadth:</b>\s*(\d+)\s+m\s+X);
-        $self->length($1 || 0);
+        $self->length($1 || $self->length || 0);
 
         if ($self->type =~ m/^tug/i and $self->length > 100) {
             $self->type("Tanker (Tug)");

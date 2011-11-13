@@ -109,6 +109,7 @@ method is_a_tanker {
 }
 
 method is_in_binlet {
+    $self->scrape unless $self->length;
     $self->polygon_east_of_second_narrows->contains(
         [ $self->lat, $self->lon ]);
 }

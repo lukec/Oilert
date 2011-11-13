@@ -48,14 +48,20 @@ method _check {
     if ($self->redis->sismember("ships_in_bi", $mmsi)) {
         # Notice ships leaving the second narrows
         if (not $new_ship->is_in_binlet) {
-            my $reason = '';
-            $reason = " full of oil" if $new_ship->has_filled_up;
 
             $self->redis->srem('ships_in_bi', $mmsi);
 
+            my $reason = '';
+            if ($new_ship->has_filled_up) {
+                $reason = "now departing with oil. Take Action: theWC.ca/tankers #OilSpill #Climate #theWC";
+            }
+            else {
+                $reason = "now departing the Burrard Inlet. Take Action: theWC.ca/tankers #Climate #theWC";
+            }
             return {
-                reason => "left the Burrard Inlet$reason",
+                reason => $reason,
                 ship => $new_ship,
+                risk => $new_ship->has_filled_up,
             };
         }
     }
@@ -66,7 +72,7 @@ method _check {
             $self->redis->sadd("ships_in_bi", $mmsi);
             $new_ship->has_filled_up(0);
             return {
-                reason => "entered the Burrard Inlet",
+                reason => "oil tanker entered the Burrard Inlet. Take Action: theWC.ca/Tankers #OilSpill #Climate #YVR #theWC",
                 ship   => $new_ship,
             };
         }
@@ -79,6 +85,7 @@ method _check {
             # Ship has just left westridge marine terminal
             $new_ship->has_filled_up(1);
             $self->redis->set_json($mmsi, $new_ship->to_hash);
+            $self->redis->srem("ships_at_WRMT", $mmsi);
 
             my %short_day = (
                 monday => 'Mon', tuesday => 'Tues', wednesday => 'Weds', 
@@ -90,11 +97,11 @@ method _check {
 #             my @tides = map { $_->hour . ':'. $_->minute . ' ' . $short_day{lc $_->day_name} }
 #                         next_ebb_tides();
 #             my $ebb_t = join ' or ', @tides;
-            $self->redis->srem("ships_at_WRMT", $mmsi);
-            return {
-                reason => "filled up with oil, will leave soon.",
-                ship => $new_ship,
-            };
+            return undef;
+#             return {
+#                 reason => "filled up with oil, will leave soon.",
+#                 ship => $new_ship,
+#             };
         }
         else {
             print " (" . $new_ship->name . " is at WRMT " . $new_ship->location_str . ") ";
@@ -105,7 +112,7 @@ method _check {
             # Ship just arrived at WRMT
             $self->redis->sadd("ships_at_WRMT", $mmsi);
             return {
-                reason => "at Kinder Morgan terminal",
+                reason => "now at the Kinder Morgan terminal. Take Action: theWC.ca/Tankers #OilSpill #Climate #theWC",
                 ship => $new_ship,
                 textable => 1,
             };
@@ -131,9 +138,10 @@ method notify {
     my $notif = shift;
     my $ship = $notif->{ship};
     my $reason = $notif->{reason};
-    my $link = "http://WildernessCommittee.org/tankers";
+    my $risk   = $notif->{risk_alert};
     my $length = $ship->length ? " ($ship->{length}m)" : '';
-    my $msg = "$ship->{name}$length $reason $link Take Action: 604-683-8220";
+    my $msg = "$ship->{name}$length $reason";
+    $msg = "RISK ALERT: $msg" if $risk;
 
     if (my $prefix = $self->config->{message_prefix}) {
         $msg = $prefix . $msg;

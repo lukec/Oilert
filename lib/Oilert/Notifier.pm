@@ -19,7 +19,7 @@ method add_subscriber {
     my $num = shift;
     $num =~ s/[^\d\+]//g;
     $self->send_sms_to( $num,
-        "You are now subscribed to Burrard Inlet Oil Tanker Traffic notifications. Call 604-683-8220 for help."
+        "You are now subscribed to Burrard Inlet Oil Tanker Traffic notifications. Call 604-683-8220 for more information."
     );
     $self->redis->sadd('notify', $num);
 };

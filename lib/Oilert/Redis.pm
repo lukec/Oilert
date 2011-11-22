@@ -13,6 +13,18 @@ has 'redis' => (is => 'ro', isa => 'Redis', lazy_build => 1,
                        rpush lpush rpop lpop/
                 ]);
 
+around [ qw/get set del sismember rpush type sadd srem smembers keys
+                       rpush lpush rpop lpop/] => sub {
+    my $orig = shift;
+    my $self = shift;
+    if (! $self->redis->ping) {
+        print " Reconnecting to Redis ";
+        delete $self->{redis};
+        $self->redis; # lazy build
+    }
+    return $self->$orig(@_);
+};
+
 method set_json {
     my $key = shift;
     my $val = shift;

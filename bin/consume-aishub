@@ -13,6 +13,7 @@ use Oilert::Notifier;
 use AnyEvent;
 use AnyEvent::Socket;
 use Try::Tiny;
+use DateTime::Duration;
 
 Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
 config->{environment} = 'production' if -d '/home/dotcloud';
@@ -108,6 +109,48 @@ my $morning_timer = AnyEvent->timer(
             $notifier ||= Oilert::Notifier->new;
             $notifier->send_sms_to_all($msg);
         }
+    }
+);
+
+my $summary_timer = AnyEvent->timer(
+    after => 0.01, interval => 900.0,
+    cb => sub {
+        print "M";
+        my $now = DateTime->now;
+        $now->set_time_zone('America/Vancouver');
+        return unless $now->hour >= 8;
+
+        my $redis = Oilert::Redis->new;
+        my $epoch_key = 'last-summary-epoch';
+        my $last = $redis->get($epoch_key);
+        if ($last) {
+            my $dt = DateTime->from_epoch(epoch => $last);
+            if ($dt > $now - DateTime::Duration->new(hours => 24)) {
+                print " Not sending summary yet ";
+                return;
+            }
+        }
+
+        eval { 
+            my $notifier = Oilert::Notifier->new;
+            my $msg = "SMS Subscribers: "
+                . scalar(@{ $notifier->sms_recipients });
+            my $twotals = $notifier->twitter->account_totals;
+            $msg .= ", Twitter followers: $twotals->{followers}";
+
+            my $ship_db = Oilert::ShipDatabase->new;
+            my $ships = $ship_db->ships;
+            $msg .= ", Ships in BI now: " . scalar(@$ships);
+
+            my @keys = $redis->keys('[1234567890]*');
+            $msg .= ", Tracking " . scalar(@keys) . " vessels";
+
+            print " (Summary: $msg) ";
+            $notifier->twitter->new_direct_message("lukec", $msg);
+            $notifier->twitter->new_direct_message("benwest", $msg);
+        };
+        warn "Tweeting summary DM: $@" if $@;
+        $redis->set($epoch_key => $now->epoch);
     }
 );
 

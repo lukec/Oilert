@@ -101,7 +101,7 @@ my $morning_timer = AnyEvent->timer(
         print "M";
         my $now = DateTime->now;
         $now->set_time_zone('America/Vancouver');
-        if ($now->hour < 7 or $now->hour > 22) {
+        if ($now->hour < 8 or $now->hour > 21) {
             return;
         }
 

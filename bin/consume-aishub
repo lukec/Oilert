@@ -99,9 +99,11 @@ my $morning_timer = AnyEvent->timer(
     after => 0.01, interval => 900.0,
     cb => sub {
         print "M";
-        my $dt = DateTime->now;
-        $dt->set_time_zone('America/Vancouver');
-        return unless $dt->hour >= 8;
+        my $now = DateTime->now;
+        $now->set_time_zone('America/Vancouver');
+        if ($now->hour < 7 or $now->hour > 22) {
+            return;
+        }
 
         my $redis = Oilert::Redis->new;
         my $notifier;

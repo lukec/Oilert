@@ -112,7 +112,7 @@ method _check {
             # Ship just arrived at WRMT
             $self->redis->sadd("ships_at_WRMT", $mmsi);
             return {
-                reason => "now at the Kinder Morgan terminal. Take Action: theWC.ca/Tankers #OilSpill #Climate #theWC",
+                reason => "now at the Kinder Morgan terminal. Take Action: theWC.ca/Tankers #OilSpill #Climate #theWC",
                 ship => $new_ship,
                 textable => 1,
             };

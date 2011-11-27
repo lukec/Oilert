@@ -40,6 +40,7 @@ get '/sms'   => sub {
         }
         else {
             debug "Unknown command";
+            email_admin("Oilert SMS received", "From: $from\nText: $msg");
         }
     }
     else {

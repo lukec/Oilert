@@ -170,7 +170,9 @@ method notify {
     }
 
     try {
-        $self->send_sms_to_all($msg) if $notif->{textable};
+        # Strip off all hashtags off of the SMS
+        (my $sms = $msg) =~ s/\s+#.+$//;
+        $self->send_sms_to_all($sms) if $notif->{textable};
     }
     catch {
         email_admin("Oilert error: texting", $_);

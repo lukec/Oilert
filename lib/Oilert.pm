@@ -2,6 +2,7 @@ package Oilert;
 use Dancer ':syntax';
 use Oilert::Notifier;
 use Oilert::ShipDatabase;
+use Oilert::Util qw/email_admin/;
 use Number::Phone;
 use DateTime;
 
@@ -28,25 +29,29 @@ get '/sms'   => sub {
     my $from = params->{from};
     my $msg  = lc params->{msg};
     my $notifier = Oilert::Notifier->new;
-    if ($msg and $from) {
-        $from =~ s/^\+?1?//;
-        $from = "+1" . $from;
-        if ($msg =~ m/^(stop|quit|leave|exit)/) {
-            debug "Stopping sending to $from";
-            $notifier->remove_subscriber($from);
-        }
-        elsif ($msg =~ m/^(yes|start|go|sub|oil)/) {
-            $notifier->add_subscriber($from);
+    eval {
+        if ($msg and $from) {
+            $from =~ s/^\+?1?//;
+            $from = "+1" . $from;
+            if ($msg =~ m/^(stop|quit|leave|exit|unsub)/) {
+                debug "Stopping sending to $from";
+                $notifier->remove_subscriber($from);
+            }
+            elsif ($msg =~ m/^(yes|start|go|sub|oil)/) {
+                $notifier->add_subscriber($from);
+            }
+            else {
+                email_admin("Oilert SMS received", "From: $from\nText: '$msg'");
+            }
         }
         else {
-            debug "Unknown command";
-            email_admin("Oilert SMS received", "From: $from\nText: $msg");
+            debug "Invalid SMS request";
         }
+        template 'sms-rx', {}, {layout => undef};
+    };
+    if ($@) {
+        debug "Error handling SMS: $@";
     }
-    else {
-        debug "Invalid SMS request";
-    }
-    template 'sms-rx', {}, {layout => undef};
 };
 
 get '/form'  => sub { template 'form', {}, {layout => undef} };

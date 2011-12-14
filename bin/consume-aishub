@@ -148,7 +148,7 @@ my $summary_timer = AnyEvent->timer(
             $msg .= ", Tracking " . scalar(@keys) . " vessels";
 
             print " (Summary: $msg) ";
-            $notifier->twitter->new_direct_message("lukec", $msg);
+            # $notifier->twitter->new_direct_message("lukec", $msg);
             $notifier->twitter->new_direct_message("benwest", $msg);
         };
         warn "Tweeting summary DM: $@" if $@;

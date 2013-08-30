@@ -14,6 +14,12 @@ use AnyEvent;
 use AnyEvent::Socket;
 use Try::Tiny;
 use DateTime::Duration;
+use Getopt::Long;
+
+my $host = 'data.aishub.net';
+GetOptions(
+    'host=s' => \$host,
+);
 
 Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
 config->{environment} = 'production' if -d '/home/dotcloud';
@@ -47,10 +53,10 @@ sub connect_to_aishub {
             warn "Haven't received data in $duration seconds, disconnecting.";
             $socket_guard = undef;
             $aishub_watcher = undef;
-            close $aishub_fh;
+            close $aishub_fh if $aishub_fh;
         }
     }
-    $socket_guard ||= tcp_connect 'data.aishub.net' => 4275, sub {
+    $socket_guard ||= tcp_connect $host => 4275, sub {
         my $aishub_fh = shift or die "Could not connect to aishub: $!";
         warn "Connected to aishub.\n";
         $aishub_watcher = AnyEvent->io(
@@ -60,7 +66,7 @@ sub connect_to_aishub {
                 try {
                     while (my $line = <$aishub_fh>) {
                         $last_rx_time = time();
-                        # warn "AISHUB: $line";
+                        #warn "AISHUB: $line";
                         my @d = split ',', $line;
                         return unless @d > 1 and $d[1] == 1 and $d[2] == 1;
                         my $msg = eval { decode_ais($d[5]) };

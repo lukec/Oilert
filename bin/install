@@ -4,18 +4,21 @@ INSTALL_DIR=/var/www/oilert
 rm -f $INSTALL_DIR/etc/services.yaml
 cp -r * $INSTALL_DIR
 cp -R etc/service $INSTALL_DIR/etc/service
-if [[ -e /etc/oilert.yaml ]]; then
-    ln -f -s /etc/oilert.yaml $INSTALL_DIR/etc/services.yaml
-fi
-if [ ! -d /etc/service/oilert-consumer ]; then \
-    update-service --add $INSTALL_DIR/etc/service/oilert-consumer oilert-consumer; \
+chown -R oilert:www $INSTALL_DIR
+
+# Install nginx config & reload nginx
+cp etc/nginx.conf /etc/nginx/conf.d/oilweb.conf
+/etc/init.d/nginx reload
+
+if [ ! -d /service/oilert-consumer ]; then
+    ln -s $INSTALL_DIR/etc/service/oilert-consumer /service/oilert-consumer
 fi
 echo "Restarting the ais consumer"
-svc -d /etc/service/oilert-consumer
-svc -u /etc/service/oilert-consumer
-if [ ! -d /etc/service/oilert-web ]; then \
-    update-service --add $INSTALL_DIR/etc/service/oilert-web oilert-web; \
+/command/svc -d /etc/service/oilert-consumer
+# /command/svc -u /etc/service/oilert-consumer
+if [ ! -d /service/oilert-web ]; then \
+    ln -s $INSTALL_DIR/etc/service/oilert-web /service/oilert-web
 fi
 echo "Restarting the oilert webserver"
-svc -d /etc/service/oilert-web
-svc -u /etc/service/oilert-web
+/command/svc -d /etc/service/oilert-web
+/command/svc -u /etc/service/oilert-web

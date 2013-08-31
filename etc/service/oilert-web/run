@@ -1,14 +1,9 @@
 #!/bin/bash
 
-# Set it up to use the locally installed Perl 5.16.0
-export PATH="/home/lukec/perl5/perlbrew/perls/perl-5.16.0/bin:$PATH"
-PERL_CPANM_OPT="--local-lib=/home/lukec/perl5"
-source /home/lukec/perl5/perlbrew/etc/bashrc
-
 OIL=/var/www/oilert
-export PERL5LIB="$OIL/lib"
+export PERL5LIB="$OIL/lib:/home/oilert/perl5/lib/perl5"
 
 exec 2>&1 \
-    /home/lukec/perl5/perlbrew/perls/perl-5.16.0/bin/starman --listen 127.0.0.1:6000 --workers 2 --preload-app \
-        --user lukec --group www-data \
+  /usr/local/bin/setuidgid oilert \
+    /home/oilert/perl5/bin/starman --listen 127.0.0.1:6000 --workers 2 --preload-app \
         $OIL/app.psgi >> /var/log/oil-web.log 2>&1

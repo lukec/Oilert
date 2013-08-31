@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# Set it up to use the locally installed Perl 5.16.0
-export PATH="/home/lukec/perl5/perlbrew/perls/perl-5.16.0/bin:$PATH"
-PERL_CPANM_OPT="--local-lib=/home/lukec/perl5"
-source /home/lukec/perl5/perlbrew/etc/bashrc
-
-OIL=/home/lukec/src/oilert
-export PERL5LIB="$OIL/lib"
+OIL=/var/www/oilert
+export PERL5LIB="$OIL/lib:/home/oilert/perl5/lib/perl5"
 
 exec 2>&1 \
-    /home/lukec/perl5/perlbrew/perls/perl-5.16.0/bin/perl $OIL/bin/consume-aishub >> /var/log/oil-consumer.log 2>&1
+  /usr/local/bin/setuidgid oilert \
+    /usr/bin/perl $OIL/bin/consume-aishub >> /var/log/oil-consumer.log 2>&1

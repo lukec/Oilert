@@ -1,0 +1,31 @@
+This system is installed at ais.wildernesscommittee.org, as described below.
+
+
+Components
+==========
+
+- nginx - serving all web traffic on port 80, proxying to the web backend on
+          port 6000.  Config lives at /etc/nginx/conf.d/oilweb.conf
+
+- web backend - serves the simple web app. Daemon is started by daemontools
+          startup script at /service/oilert-web/run.  Started on boot by
+          daemontools automatically.
+
+- aishub consumer - Listens to traffic from data.aishub.net. Started by
+          daemontools from /service like the web backend
+          Written in Perl, but uses a python ais library to decode messages
+          from aishub.
+
+- redis - Data store for the list of people to send messages to and the state
+          of the tankers.
+
+
+Making Changes
+==============
+
+The source code lives on github, and in ~oilert/src/oilert.  You can
+make code changes there, and then run `sudo ./bin/install` which will
+copy the files into /var/www/oilert and then restart applicable services.
+
+Make sure to commit your changes back to github once you have them working
+and tested.

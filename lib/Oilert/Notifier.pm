@@ -254,7 +254,7 @@ method clear_state {
 method _build_twitter {
     return undef unless $self->config->{twitter_username};
     my $t = Net::Twitter->new(
-        traits => ['API::REST', 'OAuth'],
+        traits => ['API::RESTv1_1', 'OAuth'],
         consumer_key => $self->config->{twitter_consumer_key},
         consumer_secret => $self->config->{twitter_consumer_secret},
     );

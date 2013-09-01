@@ -23,9 +23,9 @@ Components
 Making Changes
 ==============
 
-The source code lives on github, and in ~oilert/src/oilert.  You can
+The source code lives on github, and in ~oilert/public_html/oilert.  You can
 make code changes there, and then run `sudo ./bin/install` which will
-copy the files into /var/www/oilert and then restart applicable services.
+copy the files into /home/oilert/public_html/oilert and then restart applicable services.
 
 Make sure to commit your changes back to github once you have them working
 and tested.

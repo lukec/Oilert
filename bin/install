@@ -1,24 +1,20 @@
 #!/bin/bash
-INSTALL_DIR=/var/www/oilert
+set -x
+INSTALL_DIR=/home/oilert/public_html
 
 rm -f $INSTALL_DIR/etc/services.yaml
 cp -r * $INSTALL_DIR
 cp -R etc/service $INSTALL_DIR/etc/service
-chown -R oilert:www $INSTALL_DIR
 
 # Install nginx config & reload nginx
-cp etc/nginx.conf /etc/nginx/conf.d/oilweb.conf
-/etc/init.d/nginx reload
+sudo cp etc/nginx.conf /etc/nginx/conf.d/oilweb.conf
+sudo /etc/init.d/nginx reload
 
-if [ ! -d /service/oilert-consumer ]; then
-    ln -s $INSTALL_DIR/etc/service/oilert-consumer /service/oilert-consumer
-fi
 echo "Restarting the ais consumer"
-/command/svc -d /etc/service/oilert-consumer
-# /command/svc -u /etc/service/oilert-consumer
-if [ ! -d /service/oilert-web ]; then \
-    ln -s $INSTALL_DIR/etc/service/oilert-web /service/oilert-web
-fi
+sudo ln -n -f -s $INSTALL_DIR/etc/service/oilert-consumer /service/oilert-consumer
+sudo svc -d /service/oilert-consumer
+# sudo svc -u /service/oilert-consumer
 echo "Restarting the oilert webserver"
-/command/svc -d /etc/service/oilert-web
-/command/svc -u /etc/service/oilert-web
+sudo ln -n -f -s $INSTALL_DIR/etc/service/oilert-web /service/oilert-web
+sudo svc -d /service/oilert-web
+sudo svc -u /service/oilert-web

@@ -17,8 +17,10 @@ use DateTime::Duration;
 use Getopt::Long;
 
 my $host = 'data.aishub.net';
+my $verbose = 0;
 GetOptions(
     'host=s' => \$host,
+    'v|verbose' => \$verbose,
 );
 
 Dancer::Config::setting('appdir',realpath("$FindBin::Bin/.."));
@@ -58,7 +60,7 @@ sub connect_to_aishub {
     }
     $socket_guard ||= tcp_connect $host => 4275, sub {
         my $aishub_fh = shift or die "Could not connect to aishub: $!";
-        warn "Connected to aishub.\n";
+        warn "Connected to aishub.\n" if $verbose;
         $aishub_watcher = AnyEvent->io(
             fh => $aishub_fh,
             poll => 'r',
@@ -66,10 +68,11 @@ sub connect_to_aishub {
                 try {
                     while (my $line = <$aishub_fh>) {
                         $last_rx_time = time();
-                        #warn "AISHUB: $line";
+                        # warn "AISHUB: $line";
                         my @d = split ',', $line;
                         return unless @d > 1 and $d[1] == 1 and $d[2] == 1;
                         my $msg = eval { decode_ais($d[5]) };
+			warn $@ if $@ and $verbose;
                         return unless $msg;
                         return unless $msg->{id} =~ m/^[123]$/;
 

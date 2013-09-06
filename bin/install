@@ -13,7 +13,7 @@ sudo /etc/init.d/nginx reload
 echo "Restarting the ais consumer"
 sudo ln -n -f -s $INSTALL_DIR/etc/service/oilert-consumer /service/oilert-consumer
 sudo svc -d /service/oilert-consumer
-# sudo svc -u /service/oilert-consumer
+sudo svc -u /service/oilert-consumer
 echo "Restarting the oilert webserver"
 sudo ln -n -f -s $INSTALL_DIR/etc/service/oilert-web /service/oilert-web
 sudo svc -d /service/oilert-web

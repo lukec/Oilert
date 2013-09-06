@@ -29,6 +29,7 @@ ais.py emits a json stream which we consume and stick into Redis.
 
 Install dependencies first:
 * libais https://github.com/lukec/libais
+    git clone then: sudo python setup.py install
 * Many Perl dependencies listed in Makefile.PL
 * Redis
 

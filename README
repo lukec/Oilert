@@ -11,9 +11,7 @@ These are briefly explained below.
 
 ** Web Interface **
 
-The web application is written in Perl using the Dancer framework.  The initial prototype was hosted on dotCloud.
-
-The app is now hosted by Luke Closs <oil@5thplane.com>.
+The web application is written in Perl using the Dancer framework.  It is hosted at ais.wildernesscommittee.org.
 
 The web app uses a Redis database to store information about the ships.
 
@@ -21,7 +19,7 @@ The web app uses a Redis database to store information about the ships.
 
 The data feed is supplied by aishub.net as a TCP stream of raw AIS data.  The best reference for this is Eric S. Raymond's Protocol Decoding Guide - http://gpsd.berlios.de/AIVDM.html 
 
-We use a ./bin/ais.py script from Kurt Schwehr - https://github.com/schwehr
+We use a ./bin/ais.py script from Kurt Schwehr - https://github.com/lukec/libais
 * It has been modified slightly to ignore types of errors
 
 ais.py emits a json stream which we consume and stick into Redis.
@@ -30,7 +28,7 @@ ais.py emits a json stream which we consume and stick into Redis.
 === INSTALLING ===
 
 Install dependencies first:
-* libais https://github.com/schwehr/libais/
+* libais https://github.com/lukec/libais
 * Many Perl dependencies listed in Makefile.PL
 * Redis
 
@@ -39,3 +37,5 @@ And you should be able to run the web interface in development mode: plackup
 
 
 With this in place, you can install these services into your environment.
+
+See also: install-notes.txt

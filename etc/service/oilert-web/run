@@ -4,6 +4,6 @@ OIL=/var/www/oilert
 export PERL5LIB="$OIL/lib:/home/oilert/perl5/lib/perl5"
 
 exec 2>&1 \
-  /usr/local/bin/setuidgid oilert \
+  setuidgid oilert \
     /home/oilert/perl5/bin/starman --listen 127.0.0.1:6000 --workers 2 --preload-app \
         $OIL/app.psgi >> /var/log/oil-web.log 2>&1

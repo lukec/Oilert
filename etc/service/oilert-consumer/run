@@ -4,5 +4,5 @@ OIL=/var/www/oilert
 export PERL5LIB="$OIL/lib:/home/oilert/perl5/lib/perl5"
 
 exec 2>&1 \
-  /usr/local/bin/setuidgid oilert \
+  setuidgid oilert \
     /usr/bin/perl $OIL/bin/consume-aishub >> /var/log/oil-consumer.log 2>&1
